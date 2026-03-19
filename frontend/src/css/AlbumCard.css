@@ -1,4 +1,108 @@
+/* AlbumCard.css - Dark Theme with Top-Right Button */
+
 .album-card {
+  width: 100%;
+  max-width: 250px; /* ~4-5 per row */
+  background-color: #111; /* dark background */
+  border-radius: 4px; /* slightly rounded corners */
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.album-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.7);
+}
+
+.album-cover {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* square */
+  background-color: #222; /* placeholder if image missing */
+  overflow: hidden;
+}
+
+.album-cover img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.album-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.1),
+    rgba(0, 0, 0, 0.8)
+  );
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+
+.album-card:hover .album-overlay {
+  opacity: 1;
+}
+
+/* Listened button in top-right corner */
+.listened {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: black; /* symbol color */
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, background-color 0.2s ease;
+
+  /* Fixes distortion */
+  box-sizing: border-box; /* include padding/border in width/height */
+  padding: 0; /* ensure no extra padding */
+  line-height: 1; /* prevent font affecting height */
+}
+
+.listened:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.listened.active {
+  color: white; /* toggled symbol color */
+}
+
+.album-card h3 {
+  margin: 8px 12px 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #7f8c9a; /* slightly lighter grey-blueish */
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.album-card p {
+  margin: 0 12px 12px;
+  font-size: 0.85rem;
+  color: #66707a; /* slightly darker blue-grey for release date */
+}
+
+
+
+
+/* .album-card {
   position: relative;
   border-radius: 8px;
   overflow: hidden;
@@ -121,4 +225,4 @@
     height: 32px;
     font-size: 1.2rem;
   }
-}
+} */
