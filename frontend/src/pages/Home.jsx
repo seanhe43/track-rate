@@ -1,28 +1,36 @@
 import AlbumCard from "../components/AlbumCard";
-import "../css/Home.css"
-import { useState } from "react";
+import "../css/Home.css";
+import { getTopSongs, searchSpotify } from "../services/api";
+import { useState, useEffect } from "react";
 
 function Home() {
   const [searchQuery, setSearchQuery] = useState("");
+  // const [albums, setAlbums] = useState(() => getTopSongs());
+  const [albums, setAlbums] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [test, getTest] = useState(() => getTopSongs());
 
-  const albums = [
-    { id: 1, title: "AOTY", release_date: "2025" },
-    { id: 2, title: "Bops", release_date: "2023" },
-    { id: 3, title: "Pop", release_date: "2020" },
-    { id: 4, title: "Time Travel", release_date: "2030" },
-    { id: 5, title: "Jams", release_date: "2028" },
-    { id: 6, title: "AOTY", release_date: "2025" },
-    { id: 7, title: "Bops", release_date: "2023" },
-    { id: 8, title: "Pop", release_date: "2020" },
-    { id: 9, title: "Time Travel", release_date: "2030" },
-    { id: 10, title: "Jams", release_date: "2028" },
-  ];
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    if (loading) return;
+    setLoading(true);
+    try {
+      const searchResults = await searchSpotify(searchQuery);
+      setAlbums(searchResults);
 
-  const handleSearch = (e) => {
-    e.preventDefault()
-    alert(searchQuery);
+      setError(null);
+    } catch (err) {
+      console.log(err);
+      setError("Failed to search...");
+    } finally {
+      setLoading(false);
+    }
   };
 
+
+  /* ---------------------------------------------------------------------------------------------------------------- */
   return (
     <div className="home">
       <form onSubmit={handleSearch} className="search-form">
@@ -37,11 +45,17 @@ function Home() {
           Search
         </button>
       </form>
-      <div className="album-grid">
-        {albums.map((album) => (
-          <AlbumCard album={album} key={album.id} />
-        ))}
-      </div>
+
+      {/* page content*/}
+      {loading ? (
+        <div className="loading">Loading...</div>
+      ) : (
+        <div className="album-grid">
+          {albums.map((album) => (
+            <AlbumCard album={album} key={album.id} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

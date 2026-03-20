@@ -1,23 +1,29 @@
-import "../css/AlbumCard.css"
+import "../css/AlbumCard.css";
+import { useMusicContext } from "../contexts/MusicContext";
 
 function AlbumCard({ album }) {
-  function onListenedClick() {
-    alert("clicked");
+  const { addToListened, removeFromListened, isListened } = useMusicContext();
+  const listened = isListened(album.id)
+
+  function onListenedClick(e) {
+    e.preventDefault()
+    if (listened) removeFromListened(album.id)
+    else addToListened(album)
   }
 
   return (
     <div className="album-card">
       <div className="album-cover">
-        <img src={album.url} alt={album.title} />
+        <img src={album.images[1].url} alt={album.name} />
         <div className="album-overlay">
-          <button className="listened" onClick={onListenedClick}>
+          <button className={`listened ${listened ? "active" : ""}`} onClick={onListenedClick}>
             🎧
           </button>
         </div>
       </div>
       <div>
-        <h3>{album.title}</h3>
-        <p>{album.release_date}</p>
+        <h3>{album.name}</h3>
+        <p>{album.release_date?.split("-")[0]}</p>
       </div>
     </div>
   );

@@ -52,6 +52,11 @@
   opacity: 1;
 }
 
+.album-card h3,
+.album-card p {
+  text-align: left;
+}
+
 /* Listened button in top-right corner */
 .listened {
   position: absolute;
@@ -80,7 +85,7 @@
 }
 
 .listened.active {
-  color: white; /* toggled symbol color */
+  background-color: rgba(0, 255, 55, 0.863);
 }
 
 .album-card h3 {

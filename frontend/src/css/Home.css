@@ -18,20 +18,25 @@
   padding: 0.75rem 1rem;
   border: none;
   border-radius: 4px;
-  background-color: #333;
-  color: white;
+  background-color: #09111B;
+  color: #D98BA1;
   font-size: 1rem;
+}
+
+.search-input::placeholder {
+  color: #D7D7D7;
+  opacity: 1;
 }
 
 .search-input:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #666;
+  box-shadow: 0 0 0 1px #666;
 }
 
 .search-button {
   padding: 0.75rem 1.5rem;
   background-color: #24275e;
-  color: white;
+  color: D7D7D7;
   border-radius: 4px;
   font-weight: 500;
   transition: background-color 0.2s;
@@ -53,12 +58,16 @@
   }
 }
 
+
 .album-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 300px)); /* fixed card width */
-  gap: 1.5rem; /* consistent gap */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 300px));
+  gap: 1.5rem;
   padding: 1rem;
-  width: 100%;
+  width: fit-content;       /* shrink grid to fit items */
+  max-width: 100%;          /* prevent overflow on small screens */
+  margin: 0 auto;           /* centers the grid horizontally */
+  justify-content: start;   /* keeps items left-aligned inside the grid */
   box-sizing: border-box;
-  justify-content: start; /* left-align the grid items */
 }
+
