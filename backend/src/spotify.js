@@ -37,7 +37,7 @@ async function getSpotifyToken() {
 // Search route
 router.get("/search", async (req, res) => {
   const { q, type } = req.query;
-  const LIMIT = 10
+  const LIMIT = 8;
 
   try {
     const token = await getSpotifyToken();
@@ -52,6 +52,7 @@ router.get("/search", async (req, res) => {
     );
 
     const data = await response.json();
+    // console.log(JSON.stringify(data, null, 2));
     res.json(data);
   } catch (err) {
     console.error(err);
@@ -59,10 +60,27 @@ router.get("/search", async (req, res) => {
   }
 });
 
-const PLAYLIST_ID  = "37i9dQZEVXbMDoHDwVN2tF"; // Top 50 world playlist
-// get top 10 albums from top 10 songs from top 50 world playlist
+// get top 10 albums from top 10 songs from top songs playlist
+// router.get("/get-top-50", async (req, res) => {
+//   const PLAYLIST_ID = "4SWt6k4KUSNzmgRtCTzOKM";
+//   try {
+//     const token = await getSpotifyToken();
 
+//     const response = await fetch(
+//       `https://api.spotify.com/v1/playlists/${PLAYLIST_ID}?market=US`,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//         },
+//       },
+//     );
 
-
+//     const data = await response.json();
+//     res.json(data);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Spotify API error" });
+//   }
+// });
 
 module.exports = router;

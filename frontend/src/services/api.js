@@ -14,10 +14,14 @@ export const searchSpotify = async (query, type = "album") => {
   return data.albums.items;
 };
 
-export const getTopSongs = async () => {
-  const response = await fetch(`${BASE_URL}/api/playlist/top-albums`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch search results");
-  }
-    // fix
-};
+// export const getTopSongs = async () => {
+//   const response = await fetch(`${BASE_URL}/get-top-50`);
+//   if (!response.ok) {
+//     throw new Error("Failed to fetch search results");
+//   }
+//   const data = await response.json();
+//   console.log(JSON.stringify(data.tracks, null, 2))
+//   return data;
+
+//   return;
+// };

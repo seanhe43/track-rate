@@ -1,19 +1,19 @@
 import AlbumCard from "../components/AlbumCard";
 import "../css/Home.css";
-import { getTopSongs, searchSpotify } from "../services/api";
+import { searchSpotify } from "../services/api";
 import { useState, useEffect } from "react";
 
 function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  // const [albums, setAlbums] = useState(() => getTopSongs());
   const [albums, setAlbums] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [test, getTest] = useState(() => getTopSongs());
 
   const handleSearch = async (e) => {
     e.preventDefault();
+
     if (!searchQuery.trim()) return;
+
     if (loading) return;
     setLoading(true);
     try {
@@ -28,7 +28,7 @@ function Home() {
       setLoading(false);
     }
   };
-
+  /* ---------------------------------------------------------------------------------------------------------------- */
 
   /* ---------------------------------------------------------------------------------------------------------------- */
   return (
@@ -47,7 +47,7 @@ function Home() {
       </form>
 
       {/* page content*/}
-      {loading ? (
+      {(loading) ? (
         <div className="loading">Loading...</div>
       ) : (
         <div className="album-grid">

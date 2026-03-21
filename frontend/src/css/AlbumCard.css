@@ -92,16 +92,26 @@
   margin: 8px 12px 4px;
   font-size: 1rem;
   font-weight: 600;
-  color: #7f8c9a; /* slightly lighter grey-blueish */
+  color: #a0b0c2; 
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.album-card h4 {
+  margin: 8px 12px 2px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #66707a; 
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
 
 .album-card p {
-  margin: 0 12px 12px;
+  margin: 0 12px 8px;
   font-size: 0.85rem;
-  color: #66707a; /* slightly darker blue-grey for release date */
+  color: #66707a;
 }
 
 
