@@ -5,19 +5,21 @@ import { useAuth } from "../contexts/AuthContext";
 function Callback() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { setToken } = useAuth();
+  const { setToken, setRefreshToken } = useAuth();
 
   useEffect(() => {
     // Parse token from query params
     const params = new URLSearchParams(location.search);
     const tokenFromUrl = params.get("token");
+    const refreshToken = params.get("refresh_token");
 
     if (tokenFromUrl) {
       setToken(tokenFromUrl);
-      // Clean up URL (optional)
+      setRefreshToken(refreshToken);
+
+      // clean up url
       navigate("/", { replace: true });
     } else {
-      // Handle error if no token present
       console.error("No token found in URL");
     }
   }, [location.search, setToken, navigate]);

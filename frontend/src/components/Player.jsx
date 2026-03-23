@@ -6,7 +6,7 @@ import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 
 function Player() {
-  const { token } = useAuth();
+  const { fetchWithAuth, token } = useAuth();
   const [deviceId, setDeviceId] = useState(null);
   const [player, setPlayer] = useState(null);
   const [currentTrack, setCurrentTrack] = useState(null);
@@ -28,7 +28,7 @@ function Player() {
     // Fetch user's profile
     const fetchProfile = async () => {
       try {
-        const res = await fetch("https://api.spotify.com/v1/me", {
+        const res = await fetchWithAuth("https://api.spotify.com/v1/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -44,13 +44,14 @@ function Player() {
       const playerInstance = new window.Spotify.Player({
         name: "Soundtracker Player",
         getOAuthToken: (cb) => cb(token),
-        volume: 0.8,
+        volume: 0.2,
       });
 
       playerInstance.addListener("ready", ({ device_id }) => {
         setDeviceId(device_id);
+        playerInstance.getVolume().then((v) => setVolume(v * 100))
       });
-
+      
       playerInstance.addListener("player_state_changed", (state) => {
         if (!state) return;
         setCurrentTrack(state.track_window.current_track);
@@ -68,12 +69,14 @@ function Player() {
 
     const fetchCurrentPlayback = async () => {
       try {
-        const res = await fetch("https://api.spotify.com/v1/me/player", {
+        const res = await fetchWithAuth("https://api.spotify.com/v1/me/player", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (res.status === 204) return;
         if (!res.ok) return;
         const data = await res.json();
         if (!data) return;
+        
         // Update current track + paused state
         setCurrentTrack(data.item);
         setIsPaused(!data.is_playing);
@@ -85,7 +88,7 @@ function Player() {
     };
 
     fetchCurrentPlayback();
-  }, [token]);
+  }, []);
 
   // PLAYER CONTROLS
   const togglePlay = async () => {

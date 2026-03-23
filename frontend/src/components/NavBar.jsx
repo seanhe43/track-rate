@@ -3,21 +3,21 @@ import "../css/NavBar.css";
 import { useAuth } from "../contexts/AuthContext";
 
 function NavBar() {
-  const { token, setToken } = useAuth();
+  const { token, setToken, setRefreshToken } = useAuth();
 
-   const handleLogin = () => {
+  const handleLogin = () => {
     window.location.href = "http://localhost:5000/auth/login";
   };
 
   const handleLogout = () => {
-    
-    setToken(null)
+    setToken(null);
+    setRefreshToken(null);
   };
 
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/">Soundtracker</Link>
+        <Link to="/">SoundTracker</Link>
       </div>
       <div className="navbar-links">
         {!token ? (

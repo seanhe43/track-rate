@@ -7,8 +7,9 @@
   border-radius: 4px; /* slightly rounded corners */
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .album-card:hover {
@@ -72,7 +73,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
 
   /* Fixes distortion */
   box-sizing: border-box; /* include padding/border in width/height */
@@ -92,7 +95,7 @@
   margin: 8px 12px 4px;
   font-size: 1rem;
   font-weight: 600;
-  color: #a0b0c2; 
+  color: #a0b0c2;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -102,10 +105,11 @@
   margin: 8px 12px 2px;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #66707a; 
+  color: #66707a;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .album-card p {
@@ -113,9 +117,6 @@
   font-size: 0.85rem;
   color: #66707a;
 }
-
-
-
 
 /* .album-card {
   position: relative;

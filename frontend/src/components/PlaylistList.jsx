@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { getUserPlaylists, playPlaylist } from "../services/spotifyApi";
+import { useSpotifyApi } from "../services/spotifyApi";
 import "../css/PlaylistList.css";
 
 export default function PlaylistList({ token, player, deviceId }) {
+  const { getUserPlaylists, playPlaylist } = useSpotifyApi();
+
   const [playlists, setPlaylists] = useState([]);
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export default function PlaylistList({ token, player, deviceId }) {
     if (!deviceId) return;
 
     try {
-      await playPlaylist(token, deviceId, uri);
+      await playPlaylist(deviceId, uri);
     } catch (err) {
       console.error(err);
     }

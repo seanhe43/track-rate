@@ -1,9 +1,9 @@
 import { createContext, useState, useContext, useEffect } from "react";
+import { useSpotifyApi } from "../services/spotifyApi";
 
 const MusicContext = createContext();
 
 export const useMusicContext = () => useContext(MusicContext);
-
 
 export const MusicProvider = ({ children }) => {
   //Listened list CRUD
@@ -17,7 +17,7 @@ export const MusicProvider = ({ children }) => {
   }, [listened]);
 
   const addToListened = (album) => {
-    setListened((prev) => [...prev, album]);
+    setListened((prev) => [...prev, { ...album, note: "" }]);
   };
 
   const removeFromListened = (albumId) => {
@@ -25,8 +25,78 @@ export const MusicProvider = ({ children }) => {
   };
 
   const isListened = (albumId) => {
+    //return listened.map((album) => album.id + " - " + albumId)
     return listened.some((album) => album.id === albumId);
   };
+
+  const getNote = (albumId) => {
+    return listened.find(album => album.id === albumId).note
+  }
+
+  const updateNote = (albumId, note) => {
+    setListened((prev) =>
+      prev.map((album) => (album.id === albumId ? { ...album, note } : album)),
+    );
+  };
+
+  // Album Modal
+  const [selectedAlbum, setSelectedAlbum] = useState(null); // basic info from search to select for modal
+  const [albumDetails, setAlbumDetails] = useState(null); // full info from API
+  const [modalLoading, setModalLoading] = useState(false);
+
+  const openAlbumModal = (album) => {
+    setSelectedAlbum(album);
+    setAlbumDetails(null);
+  };
+
+  const closeAlbumModal = () => {
+    setSelectedAlbum(null);
+    setAlbumDetails(null);
+  };
+
+  const { getAlbum } = useSpotifyApi();
+
+  useEffect(() => {
+    if (!selectedAlbum) return; // only fetch when modal opens
+
+    const fetchAlbumDetails = async () => {
+      setModalLoading(true);
+      try {
+        const fullData = await getAlbum(selectedAlbum.id); // API call
+        setAlbumDetails(fullData);
+      } catch (err) {
+        console.error("Failed to fetch album details:", err);
+      } finally {
+        setModalLoading(false);
+      }
+    };
+
+    // fetchAlbumDetails();
+  }, [selectedAlbum]);
+
+
+
+  const value = {
+    listened,
+    addToListened,
+    removeFromListened,
+    isListened,
+    // top10,
+    // top10Loading
+    openAlbumModal,
+    closeAlbumModal,
+    selectedAlbum,
+    modalLoading,
+    albumDetails,
+    updateNote,
+    getNote
+  };
+
+  return (
+    <MusicContext.Provider value={value}>{children}</MusicContext.Provider>
+  );
+};
+
 
   //Fetch top 10 once
   // const [top10, setTop10] = useState([]);
@@ -49,17 +119,3 @@ export const MusicProvider = ({ children }) => {
   //   };
   //   fetchTop10();
   // }, []);
-
-  const value = {
-    listened,
-    addToListened,
-    removeFromListened,
-    isListened,
-    // top10,
-    // top10Loading
-  };
-
-  return (
-    <MusicContext.Provider value={value}>{children}</MusicContext.Provider>
-  );
-};

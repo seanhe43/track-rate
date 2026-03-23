@@ -1,6 +1,6 @@
 import AlbumCard from "../components/AlbumCard";
 import "../css/Home.css";
-import { searchSpotify } from "../services/api";
+import { useSpotifyApi } from "../services/spotifyApi";
 import { useState, useEffect } from "react";
 
 function Home() {
@@ -9,15 +9,15 @@ function Home() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
+  const { searchSpotify } = useSpotifyApi();
 
-    if (!searchQuery.trim()) return;
+  const performSearch = async (query) => {
+    if (!query.trim()) return;
 
     if (loading) return;
     setLoading(true);
     try {
-      const searchResults = await searchSpotify(searchQuery);
+      const searchResults = await searchSpotify(query);
       setAlbums(searchResults);
 
       setError(null);
@@ -27,6 +27,16 @@ function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    performSearch(searchQuery);
+  };
+
+  const searchArtist = async (artist) => {
+    setSearchQuery(artist);
+    performSearch(artist);
   };
   /* ---------------------------------------------------------------------------------------------------------------- */
 
@@ -47,12 +57,16 @@ function Home() {
       </form>
 
       {/* page content*/}
-      {(loading) ? (
+      {loading ? (
         <div className="loading">Loading...</div>
       ) : (
         <div className="album-grid">
           {albums.map((album) => (
-            <AlbumCard album={album} key={album.id} />
+            <AlbumCard
+              album={album}
+              key={album.id}
+              onArtistClick={searchArtist}
+            />
           ))}
         </div>
       )}

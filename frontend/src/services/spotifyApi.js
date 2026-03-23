@@ -1,37 +1,80 @@
+import { useAuth } from "../contexts/AuthContext";
 
-const SPOTIFY_BASE = "https://api.spotify.com/v1";
+const BASE_URL = "http://localhost:5000/api";
 
+export const useSpotifyApi = () => {
+  const { fetchWithAuth, token } = useAuth();
 
-export const getUserPlaylists = async (token) => {
-  const res = await fetch(`${SPOTIFY_BASE}/me/playlists?limit=50`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const searchSpotify = async (query, type = "album") => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch playlists");
-  }
-
-  const data = await res.json();
-  return data.items || [];
-};
-
-
-export const playPlaylist = async (token, deviceId, uri) => {
-  const res = await fetch(
-    `${SPOTIFY_BASE}/me/player/play?device_id=${deviceId}`,
-    {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+    const res = await fetchWithAuth(
+      `${BASE_URL}/search?q=${encodeURIComponent(query)}&type=${type}`,
+      {
+        headers,
       },
-      body: JSON.stringify({ context_uri: uri }),
-    }
-  );
+    );
 
-  if (!res.ok) {
-    throw new Error("Failed to start playlist");
-  }
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to fetch search results");
+    }
+
+    const data = await res.json();
+    return data.albums?.items || [];
+  };
+
+  const getAlbum = async (id) => {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    console.log(`${BASE_URL}/albums/${id}`)
+
+    const res = await fetchWithAuth(`${BASE_URL}/albums/${id}`, { headers });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to fetch album");
+    }
+
+    return res.json();
+  };
+
+  // User-specific endpoints
+  const getUserPlaylists = async () => {
+    const res = await fetchWithAuth(`${BASE_URL}/me/playlists`);
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch playlists");
+    }
+
+    const data = await res.json();
+    return data || [];
+  };
+
+  const playPlaylist = async (deviceId, id) => {
+    const res = await fetchWithAuth(`${BASE_URL}/me/player/play`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ deviceId, id }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to start playlist");
+    }
+  };
+
+  const playAlbum = async (deviceId, id) => {
+    const res = await fetchWithAuth(`${BASE_URL}/me/player/play`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ deviceId, id, type: "album" }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to start album");
+    }
+  };
+
+  return { searchSpotify, getUserPlaylists, playPlaylist, getAlbum };
 };
 
 // export const getRecentlyPlayed = async (token) => {
@@ -43,14 +86,5 @@ export const playPlaylist = async (token, deviceId, uri) => {
 //       },
 //     }
 //   );
-//   return res.json();
-// };
-
-// export const getUserPlaylists = async (token) => {
-//   const res = await fetch("https://api.spotify.com/v1/me/playlists", {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
 //   return res.json();
 // };
