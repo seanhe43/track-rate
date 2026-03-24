@@ -32,19 +32,36 @@ export default function PlaylistList({ token, player, deviceId }) {
     }
   };
 
+  // // check if current playback context matches this playlist
+  // const isActive = (playlistUri) => {
+  //   console.log(playlistUri + " " + context)
+  //   return (
+  //     context?.startsWith("spotify:playlist:") &&
+  //     context === playlistUri
+  //   );
+  // };
+
   return (
     <div className="playlist-list">
-      {playlists.map((pl) => (
-        <div
-          key={pl.id}
-          className="playlist-item"
-          onClick={() => handlePlayPlaylist(pl.uri)}
-        >
-          <img src={pl.images[0]?.url} alt={pl.name} className="playlist-img" />
-          <span className="playlist-name">{pl.name}</span>
-          <button className="playlist-play-btn">▶</button>
-        </div>
-      ))}
+      {playlists.map((pl) => {
+        // const active = isActive(pl.uri);
+
+        return (
+          <div
+            key={pl.id}
+            className={`playlist-item`}
+            onClick={() => handlePlayPlaylist(pl.uri)}
+          >
+            <img
+              src={pl.images[0]?.url}
+              alt={pl.name}
+              className="playlist-img"
+            />
+            <span className="playlist-name">{pl.name}</span>
+            <button className="playlist-play-btn">▶</button>
+          </div>
+        );
+      })}
     </div>
   );
 }

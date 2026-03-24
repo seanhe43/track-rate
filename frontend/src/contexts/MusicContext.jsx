@@ -24,14 +24,14 @@ export const MusicProvider = ({ children }) => {
     setListened((prev) => prev.filter((album) => album.id !== albumId));
   };
 
+
   const isListened = (albumId) => {
-    //return listened.map((album) => album.id + " - " + albumId)
     return listened.some((album) => album.id === albumId);
   };
 
   const getNote = (albumId) => {
-    return listened.find(album => album.id === albumId).note
-  }
+    return listened.find((album) => album.id === albumId).note;
+  };
 
   const updateNote = (albumId, note) => {
     setListened((prev) =>
@@ -74,8 +74,6 @@ export const MusicProvider = ({ children }) => {
     // fetchAlbumDetails();
   }, [selectedAlbum]);
 
-
-
   const value = {
     listened,
     addToListened,
@@ -89,7 +87,7 @@ export const MusicProvider = ({ children }) => {
     modalLoading,
     albumDetails,
     updateNote,
-    getNote
+    getNote,
   };
 
   return (
@@ -97,25 +95,24 @@ export const MusicProvider = ({ children }) => {
   );
 };
 
+//Fetch top 10 once
+// const [top10, setTop10] = useState([]);
+// const [top10Loading, setTop10Loading] = useState(false);
 
-  //Fetch top 10 once
-  // const [top10, setTop10] = useState([]);
-  // const [top10Loading, setTop10Loading] = useState(false);
-
-  // useEffect(() => {
-  //   const fetchTop10 = async () => {
-  //     setTop10Loading(true);
-  //     try {
-  //       const data = await getTopSongs();
-  //       console.log("HERE")
-  //       setTop10(data);
-  //       console.log(JSON.stringify(data, null, 2))
-  //     } catch (err) {
-  //       console.log(err);
-  //       setError("Failed to retrieve top 10...");
-  //     } finally {
-  //       setTop10Loading(false);
-  //     }
-  //   };
-  //   fetchTop10();
-  // }, []);
+// useEffect(() => {
+//   const fetchTop10 = async () => {
+//     setTop10Loading(true);
+//     try {
+//       const data = await getTopSongs();
+//       console.log("HERE")
+//       setTop10(data);
+//       console.log(JSON.stringify(data, null, 2))
+//     } catch (err) {
+//       console.log(err);
+//       setError("Failed to retrieve top 10...");
+//     } finally {
+//       setTop10Loading(false);
+//     }
+//   };
+//   fetchTop10();
+// }, []);

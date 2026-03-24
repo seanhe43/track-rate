@@ -68,7 +68,7 @@
   border-radius: 50%;
   border: none;
   background-color: rgba(255, 255, 255, 0.1);
-  color: black; /* symbol color */
+  color: black;
   font-size: 1.1rem;
   display: flex;
   align-items: center;
@@ -77,10 +77,9 @@
     color 0.2s ease,
     background-color 0.2s ease;
 
-  /* Fixes distortion */
-  box-sizing: border-box; /* include padding/border in width/height */
-  padding: 0; /* ensure no extra padding */
-  line-height: 1; /* prevent font affecting height */
+  box-sizing: border-box;
+  padding: 0;
+  line-height: 1;
 }
 
 .listened:hover {

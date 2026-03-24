@@ -78,7 +78,7 @@ router.get("/albums/:id", async (req, res) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    // console.log(response);
+    console.log(response);
     const data = await response.json();
 
     res.json(data);

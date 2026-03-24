@@ -10,6 +10,8 @@ const AlbumModal = () => {
     isListened,
     getNote,
     updateNote,
+    addToListened,
+    removeFromListened
   } = useMusicContext();
 
   const [note, setNote] = useState("");
@@ -21,6 +23,13 @@ const AlbumModal = () => {
   }, [selectedAlbum]);
   if (!selectedAlbum) return null;
 
+  function onListenedClick(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    if (isListened(selectedAlbum.id)) removeFromListened(selectedAlbum.id);
+    else addToListened(selectedAlbum);
+  }
+
   return (
     <>
       {modalLoading ? (
@@ -31,13 +40,21 @@ const AlbumModal = () => {
             className="modal-content album-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <img src={selectedAlbum.images[1].url} alt={selectedAlbum.name} />
+            <div className="album-art-wrapper">
+              <img src={selectedAlbum.images[0].url} alt={selectedAlbum.name} />
+              <button
+                className={`listened ${isListened(selectedAlbum.id) ? "active" : ""}`}
+                onClick={onListenedClick}
+              >
+                🎧
+              </button>
+            </div>
 
             <h2>{selectedAlbum.name}</h2>
             <h3>
               {selectedAlbum.artists?.map((artist) => artist.name).join(", ")}
             </h3>
-            <h4>{isListened(selectedAlbum.id) && "🎧"}</h4>
+            <h4>{isListened(selectedAlbum.id) && "🎧 Listened"}</h4>
             {isListened(selectedAlbum.id) && (
               <div className="album-notes">
                 <textarea
