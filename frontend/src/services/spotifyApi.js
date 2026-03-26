@@ -26,7 +26,7 @@ export const useSpotifyApi = () => {
 
   const getAlbum = async (id) => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    console.log(`${BASE_URL}/albums/${id}`)
+    console.log(`${BASE_URL}/albums/${id}`);
 
     const res = await fetchWithAuth(`${BASE_URL}/albums/${id}`, { headers });
 
@@ -53,7 +53,10 @@ export const useSpotifyApi = () => {
   const playPlaylist = async (deviceId, id) => {
     const res = await fetchWithAuth(`${BASE_URL}/me/player/play`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ deviceId, id }),
     });
 
@@ -65,7 +68,10 @@ export const useSpotifyApi = () => {
   const playAlbum = async (deviceId, id) => {
     const res = await fetchWithAuth(`${BASE_URL}/me/player/play`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ deviceId, id, type: "album" }),
     });
 
@@ -74,7 +80,32 @@ export const useSpotifyApi = () => {
     }
   };
 
-  return { searchSpotify, getUserPlaylists, playPlaylist, getAlbum };
+  const transferPlayback = async (deviceId) => {
+    try {
+      await fetchWithAuth(`${BASE_URL}/me/player`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          device_ids: [deviceId],
+          play: false,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to transfer playback:", err);
+    }
+  };
+
+  return {
+    searchSpotify,
+    getUserPlaylists,
+    playPlaylist,
+    getAlbum,
+    playAlbum,
+    transferPlayback,
+  };
 };
 
 // export const getRecentlyPlayed = async (token) => {

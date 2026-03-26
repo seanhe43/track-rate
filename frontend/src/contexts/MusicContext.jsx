@@ -24,7 +24,6 @@ export const MusicProvider = ({ children }) => {
     setListened((prev) => prev.filter((album) => album.id !== albumId));
   };
 
-
   const isListened = (albumId) => {
     return listened.some((album) => album.id === albumId);
   };
@@ -39,40 +38,57 @@ export const MusicProvider = ({ children }) => {
     );
   };
 
+  const { getAlbum } = useSpotifyApi();
   // Album Modal
-  const [selectedAlbum, setSelectedAlbum] = useState(null); // basic info from search to select for modal
-  const [albumDetails, setAlbumDetails] = useState(null); // full info from API
+  const [selectedAlbum, setSelectedAlbum] = useState(null); // basic info
+  const [extendedAlbum, setExtendedAlbum] = useState(null); // full info from API
+  const [albumDetailsCache, setAlbumDetailsCache] = useState({});
   const [modalLoading, setModalLoading] = useState(false);
+
+
+  const getIdFromBase = (album) => {
+    return album.uri.split(":")[2];
+  };
 
   const openAlbumModal = (album) => {
     setSelectedAlbum(album);
-    setAlbumDetails(null);
+    setExtendedAlbum(albumDetailsCache[getIdFromBase(album)] || null);
   };
 
   const closeAlbumModal = () => {
     setSelectedAlbum(null);
-    setAlbumDetails(null);
+    setExtendedAlbum(null);
   };
 
-  const { getAlbum } = useSpotifyApi();
+  const extendModal = async () => {
+    if (!selectedAlbum || !selectedAlbum.uri) return;
 
+    const albumId = getIdFromBase(selectedAlbum);
+    if (albumDetailsCache[albumId]) {
+      setExtendedAlbum(albumDetailsCache[albumId]);
+      return;
+    }
+
+    setModalLoading(true);
+    try {
+      const fullData = await getAlbum(albumId);
+      setAlbumDetailsCache((prev) => ({ ...prev, [albumId]: fullData }));
+      setExtendedAlbum(fullData);
+    } catch (err) {
+      console.error("Failed to fetch album details:", err);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  // when album selected for modal, get extended info
   useEffect(() => {
-    if (!selectedAlbum) return; // only fetch when modal opens
-
-    const fetchAlbumDetails = async () => {
-      setModalLoading(true);
-      try {
-        const fullData = await getAlbum(selectedAlbum.id); // API call
-        setAlbumDetails(fullData);
-      } catch (err) {
-        console.error("Failed to fetch album details:", err);
-      } finally {
-        setModalLoading(false);
-      }
-    };
-
-    // fetchAlbumDetails();
+    if (!selectedAlbum) return;
+    extendModal();
   }, [selectedAlbum]);
+
+  const [deviceId, setDeviceId] = useState(null);
+  const [playlists, setPlaylists] = useState([]);
 
   const value = {
     listened,
@@ -85,9 +101,15 @@ export const MusicProvider = ({ children }) => {
     closeAlbumModal,
     selectedAlbum,
     modalLoading,
-    albumDetails,
     updateNote,
     getNote,
+    extendedAlbum,
+    deviceId,
+    setDeviceId,
+    albumDetailsCache,
+    setAlbumDetailsCache,
+    playlists,
+    setPlaylists
   };
 
   return (

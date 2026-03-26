@@ -8,52 +8,56 @@
   z-index: 9999;
 }
 
-.modal-content.album-modal {
+.modal-content {
   background: #131c26;
   border-radius: 12px;
   padding: 2rem;
-  max-width: 50vw;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
+  width: 50vw;
+  height: 90vh;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   animation: fadeIn 0.2s ease-out;
 }
 
-/* Album art */
-.modal-content.album-modal img {
+.album-modal {
+  display: grid;
+  grid-template-columns: auto 20vw;
+  height: 100%;
+}
+
+.modal-left {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+
+
+.album-art-wrapper img {
   width: 300px;
   height: 300px;
   object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 1rem;
 }
 
-/* Album container to hold image and button */
 .album-art-wrapper {
   position: relative;
   display: inline-block;
 }
 
-.album-art-wrapper .listened {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
 
 .album-art-wrapper:hover .listened {
   opacity: 1;
-  pointer-events: auto;
 }
 
 /* Listened button in top-right corner */
-.listened {
+.album-art-wrapper .listened {
+  opacity: 0;
+  transition: opacity 0.2s ease;
   position: absolute;
   top: 8px;
-  right: 8px;
+  left: 8px;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -64,10 +68,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease;
-
   box-sizing: border-box;
   padding: 0;
   line-height: 1;
@@ -82,21 +82,19 @@
   background-color: rgba(0, 255, 55, 0.863);
 }
 
-
-
-/* Album name */
-.modal-content.album-modal h2 {
-  margin: 0.5rem 0;
+.album-name {
   font-size: 1.5rem;
-  text-align: center;
 }
 
-/* Artists */
-.modal-content.album-modal h4 {
-  margin: 0.25rem 0 1rem 0;
-  font-weight: normal;
+.album-artists {
+  color: #696969;
+  font-size: 1.2rem;
+}
+
+.album-year {
   color: #555;
-  text-align: center;
+  font-size: 1rem;
+  margin-bottom: 10px;
 }
 
 .album-notes {
@@ -108,7 +106,7 @@
 .album-notes textarea {
   width: 100%;
   max-width: 100%;
-  min-height: 250px;
+  min-height: 300px;
   padding: 0.75rem;
   font-size: 1rem;
   border-radius: 6px;
@@ -117,33 +115,63 @@
   display: flex;
 }
 /* Tracklist */
-.modal-content.album-modal ul {
+.track-list {
   width: 100%;
+  height: 100%;
   padding: 0;
   list-style: none;
   margin-bottom: 1rem;
+  grid-column: 2;
+  overflow-y: auto;
 }
 
-.modal-content.album-modal li {
+.track-row {
+  display: grid;
+  grid-template-columns: 2ch 1fr auto;
+  align-items: center;
   padding: 0.5rem 0;
   border-bottom: 1px solid #eee;
   font-size: 1rem;
+  gap: 10px
 }
 
-/* Play button
-.modal-content.album-modal button {
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  color: white;
-  border: none;
-  border-radius: 6px;
+.track-number {
+  text-align: right;
+  opacity: 0.7;
+}
+
+.track-duration {
+  text-align: right;
+  min-width: 45px;
+  opacity: 0.7;
+}
+
+
+.play-button {
+  flex: 0 0 auto;
+  width: 3.5vh;
+  height: 3vh;
+  background-color: #db527983;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: background 0.2s ease;
+  font-size: 2vh;
+  padding-top: 1vh;
+  padding-bottom: 1.4vh;
+  border-radius: 2px;
+  background-color: #db527983;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M21.4086 9.35258C23.5305 10.5065 23.5305 13.4935 21.4086 14.6474L8.59662 21.6145C6.53435 22.736 4 21.2763 4 18.9671L4 5.0329C4 2.72368 6.53435 1.26402 8.59661 2.38548L21.4086 9.35258Z' fill='%23fff'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 50%;
+  margin-bottom: 5vh;
 }
 
-.modal-content.album-modal button:hover {
-  background-color: #17a44b;
-} */
+.play-button:hover {
+  background-color: #db5279c0;
+}
 
 /* Fade-in animation */
 @keyframes fadeIn {

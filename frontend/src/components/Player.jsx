@@ -5,22 +5,69 @@ import "../css/Player.css";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import { useMusicContext } from "../contexts/MusicContext";
+import { useSpotifyApi } from "../services/spotifyApi";
 
 function Player() {
   const { fetchWithAuth, token } = useAuth();
-  const { addToListened, removeFromListened, isListened, openAlbumModal } =
-    useMusicContext();
+  const {
+    openAlbumModal,
+    deviceId,
+    setDeviceId,
+    albumDetailsCache,
+    setAlbumDetailsCache,
+    playlists,
+  } = useMusicContext();
+  const { getAlbum } = useSpotifyApi();
 
-  const [deviceId, setDeviceId] = useState(null);
   const [player, setPlayer] = useState(null);
   const [currentTrack, setCurrentTrack] = useState(null);
+  const [nextTrack, setNextTrack] = useState(null);
   const [isPaused, setIsPaused] = useState(true);
   const [userProfile, setUserProfile] = useState(null);
-  // const [context, setContext] = useState(null);
+  const [contextUri, setContextUri] = useState(null);
+  const [context, setContext] = useState(null);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isShuffled, setIsShuffled] = useState(false);
 
-  // Reset player if user logs out
+  const fetchCurrentPlayback = async () => {
+    if (!token) return;
+    try {
+      const res = await fetchWithAuth("https://api.spotify.com/v1/me/player", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 204) return;
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data) return;
+
+      setIsPaused(!data.is_playing);
+      setVolume(data.device.volume_percent);
+      setContextUri(data.context.uri);
+      setIsShuffled(data.shuffle_state);
+    } catch (err) {
+      console.error("Failed to fetch current playback:", err);
+    }
+  };
+
+  const transferPlayback = async () => {
+    try {
+      await fetchWithAuth("https://api.spotify.com/v1/me/player", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          device_ids: [deviceId],
+          play: false,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to transfer playback:", err);
+    }
+  };
+
   useEffect(() => {
     if (!token) {
       setUserProfile(null);
@@ -31,7 +78,6 @@ function Player() {
       return;
     }
 
-    // Fetch user's profile
     const fetchProfile = async () => {
       try {
         const res = await fetchWithAuth("https://api.spotify.com/v1/me", {
@@ -44,6 +90,8 @@ function Player() {
       }
     };
     fetchProfile();
+
+    fetchCurrentPlayback();
 
     // Initialize Spotify Web Playback SDK
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -61,11 +109,11 @@ function Player() {
       playerInstance.addListener("player_state_changed", (state) => {
         if (!state) return;
         setCurrentTrack(state.track_window.current_track);
+        setNextTrack(state.track_window.next_tracks[0]);
         setIsPaused(state.paused);
 
         setPosition(state.position);
         setDuration(state.duration);
-        // setContext(state.context?.uri || null);
       });
 
       playerInstance.connect();
@@ -73,35 +121,11 @@ function Player() {
     };
   }, [token]);
 
-  // FETCH CURRENT PLAYBACK STATE IN CASE THERE IS AN ACTIVE SONG (not so useful yet (until context switching implemented))
   useEffect(() => {
-    if (!token) return;
+    if (!token || !deviceId) return;
 
-    const fetchCurrentPlayback = async () => {
-      try {
-        const res = await fetchWithAuth(
-          "https://api.spotify.com/v1/me/player",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-        if (res.status === 204) return;
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!data) return;
-
-        // Update current track + paused state
-        setCurrentTrack(data.item);
-        setIsPaused(!data.is_playing);
-        // setIsShuffled(data.shuffle_state);
-        setVolume(data.device.volume_percent);
-      } catch (err) {
-        console.error("Failed to fetch current playback:", err);
-      }
-    };
-
-    fetchCurrentPlayback();
-  }, []);
+    transferPlayback();
+  }, [token, deviceId]);
 
   // seekbar updating
   useEffect(() => {
@@ -138,29 +162,35 @@ function Player() {
 
   // PLAYER CONTROLS
   const togglePlay = async () => {
+    if (!deviceId) transferPlayback();
     if (!player) return;
     await player.togglePlay();
   };
 
   // SHUFFLE
-  //   const [isShuffled, setIsShuffled] = useState(false);
-  //   const toggleShuffle = async () => {
-  //     if (!player) return;
 
-  //     try {
-  //       await player.setShuffle(!isShuffled);
-  //       setIsShuffled((prev) => !prev);
-  //     } catch (err) {
-  //       console.error("Failed to toggle shuffle:", err);
-  //     }
-  //   };
+  const toggleShuffle = async () => {
+    if (!player) return;
+
+    try {
+      const response = await fetchWithAuth(
+        `https://api.spotify.com/v1/me/player/shuffle?state=${!isShuffled}&device_id=${deviceId}`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      setIsShuffled((prev) => !prev);
+    } catch (err) {
+      console.error("Toggle Shuffle Failed", err);
+    }
+  };
 
   useEffect(() => {
     if (!player) return;
 
     const listener = (state) => {
       if (!state) return;
-      // setIsShuffled(state.shuffle);
 
       if (typeof state.volume === "number") {
         setVolume(state.volume * 100); // player.volume is 0-1, we keep 0-100
@@ -212,6 +242,28 @@ function Player() {
     className: "volume-slider",
   };
 
+  // context display
+  useEffect(() => {
+    const getFullData = async () => {
+      fetchCurrentPlayback();
+      if (!contextUri) return;
+      const [, contextType, contextId] = contextUri.split(":");
+
+      if (contextType === "album") {
+        if (!albumDetailsCache[contextId]) {
+          const fullData = await getAlbum(contextId);
+          setAlbumDetailsCache((prev) => ({ ...prev, [contextId]: fullData }));
+        }
+        setContext(albumDetailsCache[contextId]);
+      } else if (contextType === "playlist") {
+        setContext(playlists.find((playlist) => playlist.id === contextId));
+      } else {
+        setContext(null);
+      }
+    };
+    getFullData();
+  }, [currentTrack]);
+
   const progressSliderProps = {
     min: 0,
     max: duration || 1,
@@ -225,7 +277,6 @@ function Player() {
     token: token,
     player: player,
     deviceId: deviceId,
-    // activePlayerUri: context,
   };
 
   const AlbumArtProps = {
@@ -234,6 +285,16 @@ function Player() {
     className: "player-album-art",
     onClick: () => openAlbumModal(currentTrack.album),
   };
+
+  const NowPlayingArtProps = {
+    src: context ? context.images[0]?.url : null,
+    alt: context ? context.name?.url : null,
+    className: "now-playing-art",
+  };
+
+  const noSongMessage = token
+    ? "No track playing"
+    : "Log in to play from Spotify";
 
   return (
     <div className="player-sidebar">
@@ -258,24 +319,48 @@ function Player() {
             </div>
 
             <div className="player-controls">
-              {/* <button onClick={toggleShuffle}>
-                  {isShuffled ? "🔀 On" : "🔀 Off"}
-                </button> */}
+              <button
+                className={isShuffled ? "shuffle-on" : "shuffle-off"}
+                onClick={toggleShuffle}
+              />
 
-              <button onClick={() => player?.previousTrack()}>⏮</button>
+              <button
+                className="prev"
+                onClick={() => player?.previousTrack()}
+              />
 
-              <button onClick={togglePlay}>{isPaused ? "▶" : "⏸"}</button>
+              <button
+                className={isPaused ? "play" : "pause"}
+                onClick={togglePlay}
+              />
 
-              <button onClick={() => player?.nextTrack()}>⏭</button>
+              <button className="next" onClick={() => player?.nextTrack()} />
 
               <div className="player-volume" onWheel={handleVolumeScroll}>
                 <Slider {...volumeSliderProps} />
               </div>
               <p className="volume-display">{`${volume}%`}</p>
             </div>
+            {context !== null && (
+              <div className="context-hud">
+                <div className="now-playing">
+                  <div className="crop-image">
+                    <img {...NowPlayingArtProps} />
+                  </div>
+                  <span className="now-playing-name">{context?.name}</span>
+                </div>
+                <div className="up-next">
+                  {nextTrack !== null && (
+                    <div className="up-next-text">
+                      Up next: {nextTrack?.name}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         ) : (
-          <p className="no-track">No track playing</p>
+          <p className="no-track">{noSongMessage}</p>
         )}
       </div>
 

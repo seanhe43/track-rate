@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSpotifyApi } from "../services/spotifyApi";
 import "../css/PlaylistList.css";
+import { useMusicContext } from "../contexts/MusicContext";
 
 export default function PlaylistList({ token, player, deviceId }) {
   const { getUserPlaylists, playPlaylist } = useSpotifyApi();
-
-  const [playlists, setPlaylists] = useState([]);
+  const { playlists, setPlaylists } = useMusicContext();
+  
+  const [playlistsLoading, setPlaylistsLoading] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -24,7 +26,6 @@ export default function PlaylistList({ token, player, deviceId }) {
 
   const handlePlayPlaylist = async (uri) => {
     if (!deviceId) return;
-
     try {
       await playPlaylist(deviceId, uri);
     } catch (err) {
@@ -42,26 +43,32 @@ export default function PlaylistList({ token, player, deviceId }) {
   // };
 
   return (
-    <div className="playlist-list">
-      {playlists.map((pl) => {
-        // const active = isActive(pl.uri);
+    <>
+      {playlistsLoading ? (
+        <div>LOADING</div>
+      ) : (
+        <div className="playlist-list">
+          {playlists.map((pl) => {
+            // const active = isActive(pl.uri);
 
-        return (
-          <div
-            key={pl.id}
-            className={`playlist-item`}
-            onClick={() => handlePlayPlaylist(pl.uri)}
-          >
-            <img
-              src={pl.images[0]?.url}
-              alt={pl.name}
-              className="playlist-img"
-            />
-            <span className="playlist-name">{pl.name}</span>
-            <button className="playlist-play-btn">▶</button>
-          </div>
-        );
-      })}
-    </div>
+            return (
+              <div
+                key={pl.id}
+                className={`playlist-item`}
+                onClick={() => handlePlayPlaylist(pl.uri)}
+              >
+                <img
+                  src={pl.images[0]?.url}
+                  alt={pl.name}
+                  className="playlist-img"
+                />
+                <span className="playlist-name">{pl.name}</span>
+                <button className="playlist-play-btn">▶</button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </>
   );
 }

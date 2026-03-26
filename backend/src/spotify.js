@@ -43,8 +43,7 @@ router.get("/search", async (req, res) => {
   try {
     const isValidToken =
       userToken && userToken !== "null" && userToken !== "undefined";
-    const token = isValidToken ? userToken : await getSpotifyToken();
-    // console.log(token);
+    const token = isValidToken ? userToken : await getSpotifyToken();;
     const response = await fetch(
       `https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=${type}&limit=${LIMIT}`,
       {
@@ -53,9 +52,7 @@ router.get("/search", async (req, res) => {
         },
       },
     );
-    // console.log(response);
     const data = await response.json();
-    // console.log(JSON.stringify(data, null, 2));
     res.json(data);
   } catch (err) {
     console.error(err);
@@ -72,13 +69,11 @@ router.get("/albums/:id", async (req, res) => {
       userToken && userToken !== "null" && userToken !== "undefined";
     //const token = isValidToken ? userToken : await getSpotifyToken();
     const token = await getSpotifyToken();
-    // console.log(token);
     const response = await fetch(`https://api.spotify.com/v1/albums/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response);
     const data = await response.json();
 
     res.json(data);
