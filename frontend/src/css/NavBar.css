@@ -1,11 +1,14 @@
 .navbar {
   background-color: #0d141b;
   padding: 1rem 2rem;
-  height: 7vh;
+  height: var(--navbar-height);
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
 }
 
 .navbar-brand {

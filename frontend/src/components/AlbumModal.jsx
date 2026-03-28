@@ -1,7 +1,8 @@
-import { useContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useMusicContext } from "../contexts/MusicContext";
+import { usePlayerContext } from "../contexts/PlayerContext";
 import "../css/AlbumModal.css";
-import { useSpotifyApi } from "../services/spotifyApi";
+
 
 const AlbumModal = () => {
   const {
@@ -14,10 +15,9 @@ const AlbumModal = () => {
     addToListened,
     removeFromListened,
     extendedAlbum,
-    deviceId,
-  } = useMusicContext();
+  } = useMusicContext(); 
 
-  const { playAlbum } = useSpotifyApi();
+  const { playAlbum } = usePlayerContext();
 
   const [note, setNote] = useState("");
 
@@ -49,10 +49,8 @@ const AlbumModal = () => {
   }
 
   const handlePlayAlbum = async (uri) => {
-    if (!deviceId) return;
-
     try {
-      await playAlbum(deviceId, uri);
+      await playAlbum(uri);
     } catch (err) {
       console.error(err);
     }

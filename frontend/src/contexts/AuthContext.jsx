@@ -35,7 +35,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const fetchWithAuth = async (url, options = {}) => {
+const fetchWithAuth = async (url, options = {}) => {
+  try {
     let res = await fetch(url, {
       ...options,
       headers: {
@@ -43,23 +44,32 @@ export const AuthProvider = ({ children }) => {
         Authorization: `Bearer ${token}`,
       },
     });
-
     if (res.status === 401) {
       const newToken = await refreshAccessToken();
 
       if (!newToken) return res;
 
-      res = await fetch(url, {
-        ...options,
-        headers: {
-          ...options.headers,
-          Authorization: `Bearer ${newToken}`,
-        },
-      });
+      try {
+        res = await fetch(url, {
+          ...options,
+          headers: {
+            ...options.headers,
+            Authorization: `Bearer ${newToken}`,
+          },
+        });
+      } catch (retryErr) {
+        console.error("Retry fetch failed:", retryErr);
+        throw retryErr;
+      }
     }
 
     return res;
-  };
+  } catch (err) {
+    console.error("Fetch failed:", err);
+    throw err; 
+  }
+};
+
 
   useEffect(() => {
     if (refreshToken) {
@@ -79,7 +89,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ token, setToken, refreshToken, setRefreshToken, fetchWithAuth }}
+      value={{ token, setToken, refreshToken, setRefreshToken, fetchWithAuth, refreshAccessToken }}
     >
       {children}
     </AuthContext.Provider>

@@ -39,7 +39,6 @@ router.get("/search", async (req, res) => {
   const { q, type } = req.query;
   const userToken = req.headers["authorization"]?.replace("Bearer ", "");
   const LIMIT = 8;
-
   try {
     const isValidToken =
       userToken && userToken !== "null" && userToken !== "undefined";
@@ -85,6 +84,7 @@ router.get("/albums/:id", async (req, res) => {
 
 // User-specific endpoints (require user token)
 router.get("/me/playlists", async (req, res) => {
+
   const userToken = req.headers["authorization"]?.replace("Bearer ", "");
   if (!userToken)
     return res.status(401).json({ error: "User not authenticated" });

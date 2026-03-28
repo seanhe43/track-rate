@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useSpotifyApi } from "../services/spotifyApi";
 import "../css/PlaylistList.css";
-import { useMusicContext } from "../contexts/MusicContext";
+import { usePlayerContext } from "../contexts/PlayerContext";
 
 export default function PlaylistList({ token, player, deviceId }) {
   const { getUserPlaylists, playPlaylist } = useSpotifyApi();
-  const { playlists, setPlaylists } = useMusicContext();
+  const { playlists, setPlaylists } = usePlayerContext();
   
   const [playlistsLoading, setPlaylistsLoading] = useState(false);
 

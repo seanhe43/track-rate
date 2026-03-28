@@ -52,7 +52,7 @@ export const MusicProvider = ({ children }) => {
 
   const openAlbumModal = (album) => {
     setSelectedAlbum(album);
-    setExtendedAlbum(albumDetailsCache[getIdFromBase(album)] || null);
+    extendModal();
   };
 
   const closeAlbumModal = () => {
@@ -88,7 +88,7 @@ export const MusicProvider = ({ children }) => {
   }, [selectedAlbum]);
 
   const [deviceId, setDeviceId] = useState(null);
-  const [playlists, setPlaylists] = useState([]);
+  
 
   const value = {
     listened,
@@ -108,8 +108,6 @@ export const MusicProvider = ({ children }) => {
     setDeviceId,
     albumDetailsCache,
     setAlbumDetailsCache,
-    playlists,
-    setPlaylists
   };
 
   return (

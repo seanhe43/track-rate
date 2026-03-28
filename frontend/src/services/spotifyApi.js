@@ -26,7 +26,7 @@ export const useSpotifyApi = () => {
 
   const getAlbum = async (id) => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    console.log(`${BASE_URL}/albums/${id}`);
+    // console.log(`${BASE_URL}/albums/${id}`);
 
     const res = await fetchWithAuth(`${BASE_URL}/albums/${id}`, { headers });
 
@@ -65,20 +65,6 @@ export const useSpotifyApi = () => {
     }
   };
 
-  const playAlbum = async (deviceId, id) => {
-    const res = await fetchWithAuth(`${BASE_URL}/me/player/play`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ deviceId, id, type: "album" }),
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to start album");
-    }
-  };
 
   const transferPlayback = async (deviceId) => {
     try {
@@ -103,7 +89,6 @@ export const useSpotifyApi = () => {
     getUserPlaylists,
     playPlaylist,
     getAlbum,
-    playAlbum,
     transferPlayback,
   };
 };

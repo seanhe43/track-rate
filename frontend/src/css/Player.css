@@ -1,3 +1,19 @@
+.player-sidebar {
+  --sidebar-width: 20vw;
+  width: var(--sidebar-width);
+  min-width: 200px;
+  height: 100vh;
+  background-color: #111;
+  color: #fff;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  position: fixed;
+  bottom: 0;
+  padding-top: calc(1rem + var(--navbar-height));
+}
+
 .player-album-art {
   width: 100%;
   border-radius: 8px;
@@ -46,25 +62,17 @@
   margin-top: 5px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-size: 1.5vh;
+  justify-content: space-between;
+  gap: 0.3rem;
 }
 
 .player-controls button {
-  flex: 0 0 auto;
-  width: 3.5vh;
-  height: 3vh;
+  flex: 0 0 15%;
   background-color: #db527983;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
-  font-size: 2vh;
-  padding-top: 1vh;
-  padding-bottom: 1.4vh;
   border-radius: 2px;
+  min-width: 40px;
+  min-height: 25px;
 }
 
 .player-controls button:hover {
@@ -114,10 +122,11 @@
 }
 
 .player-volume {
-  min-width: 4vw;
+  min-width: 80px;
   display: flex;
   align-items: center;
   margin-left: 0.5rem;
+  flex: 1 1 auto;
 }
 
 .volume-slider {
@@ -135,6 +144,7 @@
 .volume-display {
   color: #ccc;
   font-size: 1.2vh;
+  flex: 0 0 auto;
 }
 
 .context-hud {
@@ -205,23 +215,11 @@
   margin-bottom: 1vh;
 }
 
-.player-sidebar {
-  width: 20vw;
-  min-width: 200px;
-  height: 93vh;
-  background-color: #111;
-  color: #fff;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
 
 .player-profile {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  /* stays pinned at bottom naturally */
 }
 
 .player-profile img {
