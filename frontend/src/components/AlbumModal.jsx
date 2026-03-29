@@ -22,7 +22,7 @@ const AlbumModal = () => {
   const [note, setNote] = useState("");
 
   useEffect(() => {
-    if (selectedAlbum && isListened(selectedAlbum)) {
+    if (selectedAlbum) {
       setNote(getNote(selectedAlbum.id) || "");
     }
   }, [selectedAlbum]);

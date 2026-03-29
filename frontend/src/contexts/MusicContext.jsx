@@ -29,7 +29,7 @@ export const MusicProvider = ({ children }) => {
   };
 
   const getNote = (albumId) => {
-    return listened.find((album) => album.id === albumId).note;
+    return listened.find((album) => album.id === albumId)?.note || "";
   };
 
   const updateNote = (albumId, note) => {

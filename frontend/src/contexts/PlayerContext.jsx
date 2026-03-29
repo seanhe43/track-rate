@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useSpotifyApi } from "../services/spotifyApi";
 
@@ -20,31 +20,37 @@ export const PlayerProvider = ({ children }) => {
   const [volume, setVolume] = useState(20);
   const [isShuffled, setIsShuffled] = useState(false);
 
-  const [contextUri, setContextUri] = useState(null);
+  // const [contextUri, setContextUri] = useState(null);
   const [context, setContext] = useState(null);
 
-const [playlists, setPlaylists] = useState([]); // user playlists
+  const [playlists, setPlaylists] = useState([]); // user playlists
   const [albumCache, setAlbumCache] = useState({}); // cache albums from active session for hud
 
-  const fetchCurrentPlayback = async () => {
-    if (!token) return;
+  // const fetchCurrentPlayback = async () => {
+  //   if (!token) return;
 
-    try {
-      const res = await fetchWithAuth("https://api.spotify.com/v1/me/player");
-      if (res.status === 204 || !res.ok) return;
+  //   try {
+  //     const res = await fetchWithAuth("https://api.spotify.com/v1/me/player");
+  //     if (res.status === 204 || !res.ok) return;
 
-      const data = await res.json();
+  //     const data = await res.json();
 
-      setIsPaused(!data.is_playing);
-      setVolume(data.device.volume_percent);
-      setContextUri(data.context?.uri);
-      setIsShuffled(data.shuffle_state);
-    } catch (err) {
-      console.error("Failed to fetch playback:", err);
-    }
-  };
+  //     setIsPaused(!data.is_playing);
+  //     setVolume(data.device.volume_percent);
+  //     setContextUri(data.context?.uri);
+  //     setIsShuffled(data.shuffle_state);
+  //     if (data.device.id !== deviceId) {
+  //       transferPlayback();
+  //     }
+  //   } catch (err) {
+  //     console.error("Failed to fetch playback:", err);
+  //   }
+  // };
 
   const transferPlayback = async () => {
+    console.log("Transferring to " + deviceId);
+
+    if (!deviceId) return;
     try {
       await fetchWithAuth("https://api.spotify.com/v1/me/player", {
         method: "PUT",
@@ -107,8 +113,12 @@ const [playlists, setPlaylists] = useState([]); // user playlists
   };
 
   useEffect(() => {
-    const getFullData = async () => {
-      fetchCurrentPlayback();
+    const updateNowPlayingHud = async () => {
+      const state = await player.getCurrentState();
+
+      if (!state) return;
+      setNextTrack(state.track_window.next_tracks[0]);
+      const contextUri = state.context.uri;
       if (!contextUri) return;
       const [, contextType, contextId] = contextUri.split(":");
 
@@ -124,10 +134,13 @@ const [playlists, setPlaylists] = useState([]); // user playlists
         setContext(null);
       }
     };
-    getFullData();
-  }, [currentTrack]);
+    updateNowPlayingHud();
+  }, [currentTrack, isShuffled]);
 
   // --- INIT PLAYER ---
+
+  // enforce singleton player
+  const playerRef = useRef(null);
 
   useEffect(() => {
     if (!token) {
@@ -139,15 +152,20 @@ const [playlists, setPlaylists] = useState([]); // user playlists
     }
 
     const loadPlayer = () => {
+      if (playerRef.current) return; // guard
+
       const player = new window.Spotify.Player({
         name: "Soundtracker Player",
         getOAuthToken: (cb) => cb(token),
         volume: 0.2,
       });
 
+      playerRef.current = player;
+
       player.addListener("ready", ({ device_id }) => {
         setDeviceId(device_id);
-        player.setVolume(volume ? volume/100 : 0.2);
+        player.setVolume(volume ? volume / 100 : 0.2);
+        console.log("player ready at " + device_id);
       });
 
       player.addListener("player_state_changed", (state) => {
@@ -169,19 +187,25 @@ const [playlists, setPlaylists] = useState([]); // user playlists
     };
 
     if (window.Spotify) {
-      // SDK is already loaded
       loadPlayer();
     } else {
-      // Load SDK dynamically
-      const script = document.createElement("script");
-      script.src = "https://sdk.scdn.co/spotify-player.js";
-      script.async = true;
-      document.body.appendChild(script);
+      if (!document.getElementById("spotify-sdk")) {
+        const script = document.createElement("script");
+        script.id = "spotify-sdk";
+        script.src = "https://sdk.scdn.co/spotify-player.js";
+        script.async = true;
+        document.body.appendChild(script);
+      }
 
       window.onSpotifyWebPlaybackSDKReady = loadPlayer;
     }
 
-    fetchCurrentPlayback();
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.disconnect();
+        playerRef.current = null;
+      }
+    };
   }, [token]);
 
   useEffect(() => {
@@ -204,8 +228,6 @@ const [playlists, setPlaylists] = useState([]); // user playlists
     return () => clearInterval(interval);
   }, [isPaused, duration]);
 
-
-
   const value = {
     player,
     deviceId,
@@ -224,7 +246,7 @@ const [playlists, setPlaylists] = useState([]); // user playlists
     setPosition,
     playAlbum,
     playlists,
-    setPlaylists
+    setPlaylists,
   };
 
   return (
