@@ -11,13 +11,13 @@ function Home() {
 
   const { searchSpotify } = useSpotifyApi();
 
-  const performSearch = async (query) => {
+  const performSearch = async (query, type = "album") => {
     if (!query.trim()) return;
 
     if (loading) return;
     setLoading(true);
     try {
-      const searchResults = await searchSpotify(query);
+      const searchResults = await searchSpotify(query, type);
       setAlbums(searchResults);
 
       setError(null);
@@ -55,6 +55,8 @@ function Home() {
           Search
         </button>
       </form>
+
+      {error && <div className="error-message">{error}</div>}
 
       {/* page content*/}
       {loading ? (

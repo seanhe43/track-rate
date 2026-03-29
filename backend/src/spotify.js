@@ -42,7 +42,7 @@ router.get("/search", async (req, res) => {
   try {
     const isValidToken =
       userToken && userToken !== "null" && userToken !== "undefined";
-    const token = isValidToken ? userToken : await getSpotifyToken();;
+    const token = isValidToken ? userToken : await getSpotifyToken();
     const response = await fetch(
       `https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=${type}&limit=${LIMIT}`,
       {
@@ -66,8 +66,8 @@ router.get("/albums/:id", async (req, res) => {
   try {
     const isValidToken =
       userToken && userToken !== "null" && userToken !== "undefined";
-    //const token = isValidToken ? userToken : await getSpotifyToken();
-    const token = await getSpotifyToken();
+    const token = isValidToken ? userToken : await getSpotifyToken();
+    // const token = await getSpotifyToken();
     const response = await fetch(`https://api.spotify.com/v1/albums/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -82,9 +82,31 @@ router.get("/albums/:id", async (req, res) => {
   }
 });
 
+router.get("/playlists/:id", async (req, res) => {
+  const { id } = req.params;
+  const userToken = req.headers["authorization"]?.replace("Bearer ", "");
+
+  try {
+    const isValidToken =
+      userToken && userToken !== "null" && userToken !== "undefined";
+    const token = isValidToken ? userToken : await getSpotifyToken();
+    const response = await fetch(
+      `https://api.spotify.com/v1/playlists/${id}/items?fields=items(track(album))&limit=16`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Spotify API error" });
+  }
+});
+
 // User-specific endpoints (require user token)
 router.get("/me/playlists", async (req, res) => {
-
   const userToken = req.headers["authorization"]?.replace("Bearer ", "");
   if (!userToken)
     return res.status(401).json({ error: "User not authenticated" });

@@ -35,10 +35,6 @@ export const PlayerProvider = ({ children }) => {
 
   //     const data = await res.json();
 
-  //     setIsPaused(!data.is_playing);
-  //     setVolume(data.device.volume_percent);
-  //     setContextUri(data.context?.uri);
-  //     setIsShuffled(data.shuffle_state);
   //     if (data.device.id !== deviceId) {
   //       transferPlayback();
   //     }
@@ -48,7 +44,7 @@ export const PlayerProvider = ({ children }) => {
   // };
 
   const transferPlayback = async () => {
-    console.log("Transferring to " + deviceId);
+    // console.log("Transferring to " + deviceId);
 
     if (!deviceId) return;
     try {
@@ -73,7 +69,7 @@ export const PlayerProvider = ({ children }) => {
     player.connect();
     try {
       const res = await fetchWithAuth(
-        `https://api.spotify.com/v1/me/player/play`,
+        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
         {
           method: "PUT",
           body: JSON.stringify({ context_uri: id }),
@@ -115,7 +111,6 @@ export const PlayerProvider = ({ children }) => {
   useEffect(() => {
     const updateNowPlayingHud = async () => {
       const state = await player.getCurrentState();
-
       if (!state) return;
       setNextTrack(state.track_window.next_tracks[0]);
       const contextUri = state.context.uri;
@@ -134,7 +129,7 @@ export const PlayerProvider = ({ children }) => {
         setContext(null);
       }
     };
-    updateNowPlayingHud();
+    if (player) updateNowPlayingHud();
   }, [currentTrack, isShuffled]);
 
   // --- INIT PLAYER ---
@@ -165,7 +160,7 @@ export const PlayerProvider = ({ children }) => {
       player.addListener("ready", ({ device_id }) => {
         setDeviceId(device_id);
         player.setVolume(volume ? volume / 100 : 0.2);
-        console.log("player ready at " + device_id);
+        // console.log("player ready at " + device_id);
       });
 
       player.addListener("player_state_changed", (state) => {

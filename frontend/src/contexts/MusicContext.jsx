@@ -87,8 +87,20 @@ export const MusicProvider = ({ children }) => {
     extendModal();
   }, [selectedAlbum]);
 
+  // info modal
+  const [infoModalOpen, setInfoModalOpen] = useState(true);
+
+  const openInfoModal = () => {
+    setInfoModalOpen(true);
+  };
+
+  const closeInfoModal = () => {
+    setInfoModalOpen(false);
+  };
+
+
+
   const [deviceId, setDeviceId] = useState(null);
-  
 
   const value = {
     listened,
@@ -108,6 +120,9 @@ export const MusicProvider = ({ children }) => {
     setDeviceId,
     albumDetailsCache,
     setAlbumDetailsCache,
+    infoModalOpen,
+    closeInfoModal,
+    openInfoModal
   };
 
   return (

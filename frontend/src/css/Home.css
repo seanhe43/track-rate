@@ -48,6 +48,10 @@
   background-color: #181a3f;
 }
 
+.error-message {
+  color: red;
+}
+
 
 @media (max-width: 639px) {
   .home {

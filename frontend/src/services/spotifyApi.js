@@ -38,6 +38,8 @@ export const useSpotifyApi = () => {
     return res.json();
   };
 
+
+
   // User-specific endpoints
   const getUserPlaylists = async () => {
     const res = await fetchWithAuth(`${BASE_URL}/me/playlists`);

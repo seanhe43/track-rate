@@ -9,6 +9,7 @@ import { PlayerProvider } from "./contexts/PlayerContext";
 import Callback from "./pages/Callback";
 import Player from "./components/Player";
 import AlbumModal from "./components/AlbumModal";
+import InfoModal from "./components/InfoModal";
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <MusicProvider>
           <NavBar />
           <div className="app-layout">
+            <InfoModal/>
             <Player />
             <AlbumModal />
             <main className="main-content">
