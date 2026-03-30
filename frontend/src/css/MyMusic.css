@@ -7,3 +7,58 @@ p {
 .my-music {
   padding-top: var(--navbar-height);
 }
+
+.my-music-controls {
+  max-width: 600px;
+  margin: 1rem auto 2rem;
+  display: flex;
+  gap: 0.2rem;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+
+.search-input,
+.sort-controls select,
+.sort-controls button {
+  height: 44px;
+  padding: 0 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  box-sizing: border-box;
+  color: #d98ba1;
+  background-color: #09111b;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-input:focus,
+.sort-controls select:focus,
+.sort-controls button:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px #e06588;
+}
+
+.search-input {
+  flex: 4;
+}
+
+.sort-controls select {
+  flex: 2;
+}
+
+.sort-controls button {
+  flex: 1;
+}
+
+
+.sort-controls {
+  display: flex;            /* flatten flex, keep select + button on same row */
+  gap: 0.2rem;
+  flex: 1;
+  align-items: center;      /* ensures children are centered vertically */
+}

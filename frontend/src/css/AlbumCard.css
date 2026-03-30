@@ -2,14 +2,15 @@
 
 .album-card {
   width: 100%;
-  max-width: 250px; /* ~4-5 per row */
-  background-color: #111; /* dark background */
-  border-radius: 4px; /* slightly rounded corners */
+  max-width: var(--card-size);
+  background-color: #111;
+  border-radius: 4px;
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
+  position: relative;
 }
 
 .album-card:hover {
@@ -20,8 +21,8 @@
 .album-cover {
   position: relative;
   width: 100%;
-  padding-top: 100%; /* square */
-  background-color: #222; /* placeholder if image missing */
+  padding-top: 100%;
+  background-color: #222;
   overflow: hidden;
   cursor: pointer;
 }
@@ -59,7 +60,6 @@
   text-align: left;
 }
 
-/* Listened button in top-right corner */
 .listened {
   position: absolute;
   top: 8px;
@@ -91,6 +91,17 @@
   background-color: rgba(0, 255, 55, 0.863);
 }
 
+.rating {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+}
+
+.album-info {
+  position: relative;
+}
+
+
 .album-card h3 {
   margin: 8px 12px 4px;
   font-size: 1rem;
@@ -117,4 +128,3 @@
   font-size: 0.85rem;
   color: #66707a;
 }
-

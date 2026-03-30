@@ -38,13 +38,24 @@ export const MusicProvider = ({ children }) => {
     );
   };
 
+  const setRating = (albumId, rating) => {
+    setListened((prev) =>
+      prev.map((album) =>
+        album.id === albumId ? { ...album, rating } : album,
+      ),
+    );
+  };
+
+  const getRating = (albumId) => {
+    return listened.find((album) => album.id === albumId)?.rating || 0;
+  };
+
   const { getAlbum } = useSpotifyApi();
   // Album Modal
   const [selectedAlbum, setSelectedAlbum] = useState(null); // basic info
   const [extendedAlbum, setExtendedAlbum] = useState(null); // full info from API
   const [albumDetailsCache, setAlbumDetailsCache] = useState({});
   const [modalLoading, setModalLoading] = useState(false);
-
 
   const getIdFromBase = (album) => {
     return album.uri.split(":")[2];
@@ -98,8 +109,6 @@ export const MusicProvider = ({ children }) => {
     setInfoModalOpen(false);
   };
 
-
-
   const [deviceId, setDeviceId] = useState(null);
 
   const value = {
@@ -122,7 +131,9 @@ export const MusicProvider = ({ children }) => {
     setAlbumDetailsCache,
     infoModalOpen,
     closeInfoModal,
-    openInfoModal
+    openInfoModal,
+    setRating,
+    getRating,
   };
 
   return (

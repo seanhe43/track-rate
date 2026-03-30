@@ -25,7 +25,6 @@ export default function PlaylistList({ token, player, deviceId }) {
   }, [token]);
 
   const handlePlayPlaylist = async (uri) => {
-    if (!deviceId) return;
     try {
       await playPlaylist(deviceId, uri);
     } catch (err) {

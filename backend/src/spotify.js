@@ -38,7 +38,7 @@ async function getSpotifyToken() {
 router.get("/search", async (req, res) => {
   const { q, type } = req.query;
   const userToken = req.headers["authorization"]?.replace("Bearer ", "");
-  const LIMIT = 8;
+  const LIMIT = 10;
   try {
     const isValidToken =
       userToken && userToken !== "null" && userToken !== "undefined";

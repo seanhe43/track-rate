@@ -1,9 +1,18 @@
+import Rating from "@mui/material/Rating";
 import "../css/AlbumCard.css";
 import { useMusicContext } from "../contexts/MusicContext";
 
 function AlbumCard({ album, onArtistClick }) {
-  const { addToListened, removeFromListened, isListened, openAlbumModal } = useMusicContext();
+  const {
+    addToListened,
+    removeFromListened,
+    isListened,
+    openAlbumModal,
+    setRating,
+    getRating,
+  } = useMusicContext();
   const listened = isListened(album.id);
+  const rating = getRating(album.id);
 
   function onListenedClick(e) {
     e.stopPropagation();
@@ -15,6 +24,26 @@ function AlbumCard({ album, onArtistClick }) {
   function handleArtistClick(artist) {
     onArtistClick(artist.name);
   }
+
+  function onRatingChange(e, newRating) {
+    e.stopPropagation();
+    if (!listened) addToListened(album);
+    setRating(album.id, newRating);
+  }
+
+  const ratingProperties = {
+    value: rating,
+    onChange: (e, newRating) => onRatingChange(e, newRating),
+    onClick: (e) => e.stopPropagation(),
+    precision: 0.5,
+    sx : {
+    color: '#e06588',
+    '& .MuiRating-iconEmpty': {
+      color: '#66707a',
+    },
+    textShadow: '0 0 6px rgba(0,0,0,0.8)',
+  }
+  };
 
   return (
     <div className="album-card">
@@ -29,7 +58,7 @@ function AlbumCard({ album, onArtistClick }) {
           </button>
         </div>
       </div>
-      <div>
+      <div className="album-info">
         <h3>{album.name}</h3>
         <h4>
           {album.artists?.map((artist, index) => (
@@ -44,6 +73,9 @@ function AlbumCard({ album, onArtistClick }) {
         </h4>
         <p>{album.release_date?.split("-")[0]}</p>
       </div>
+      <div className="rating">
+          <Rating {...ratingProperties} />
+        </div>
     </div>
   );
 }

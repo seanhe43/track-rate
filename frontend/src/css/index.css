@@ -17,6 +17,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   --navbar-height: 60px;
+  --card-size: 250px;
 }
 
 * {
@@ -88,4 +89,14 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--card-size));
+  gap: 3rem 2.5rem;
+  padding: 1rem;
+  width: 100%;
+  justify-content: center;
+  box-sizing: border-box;
 }
