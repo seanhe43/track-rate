@@ -4,8 +4,8 @@ import "../css/PlaylistList.css";
 import { usePlayerContext } from "../contexts/PlayerContext";
 
 export default function PlaylistList({ token, player, deviceId }) {
-  const { getUserPlaylists, playPlaylist } = useSpotifyApi();
-  const { playlists, setPlaylists } = usePlayerContext();
+  const { getUserPlaylists } = useSpotifyApi();
+  const { playlists, setPlaylists, playPlaylist } = usePlayerContext();
   
   const [playlistsLoading, setPlaylistsLoading] = useState(false);
 
@@ -26,7 +26,7 @@ export default function PlaylistList({ token, player, deviceId }) {
 
   const handlePlayPlaylist = async (uri) => {
     try {
-      await playPlaylist(deviceId, uri);
+      await playPlaylist(uri);
     } catch (err) {
       console.error(err);
     }

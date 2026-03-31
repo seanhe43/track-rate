@@ -1,13 +1,11 @@
 import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useSpotifyApi } from "../services/spotifyApi";
-
 const PlayerContext = createContext();
-
 export const usePlayerContext = () => useContext(PlayerContext);
 
 export const PlayerProvider = ({ children }) => {
-  const { fetchWithAuth, token } = useAuth();
+  const { fetchWithAuth, token, refreshAccessToken } = useAuth();
   const { getAlbum } = useSpotifyApi();
 
   const [player, setPlayer] = useState(null);
@@ -19,84 +17,124 @@ export const PlayerProvider = ({ children }) => {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(20);
   const [isShuffled, setIsShuffled] = useState(false);
-
-  // const [contextUri, setContextUri] = useState(null);
   const [context, setContext] = useState(null);
+  const [playlists, setPlaylists] = useState([]);
+  const [albumCache, setAlbumCache] = useState({});
 
-  const [playlists, setPlaylists] = useState([]); // user playlists
-  const [albumCache, setAlbumCache] = useState({}); // cache albums from active session for hud
+  // refs for player sdk : ensure singleton player, keep player alive
+  const playerRef = useRef(null);
+  const hasInitialized = useRef(false);
+  const playerReady = useRef(null); // resolves with deviceId when player is ready
 
-  // const fetchCurrentPlayback = async () => {
-  //   if (!token) return;
-
-  //   try {
-  //     const res = await fetchWithAuth("https://api.spotify.com/v1/me/player");
-  //     if (res.status === 204 || !res.ok) return;
-
-  //     const data = await res.json();
-
-  //     if (data.device.id !== deviceId) {
-  //       transferPlayback();
-  //     }
-  //   } catch (err) {
-  //     console.error("Failed to fetch playback:", err);
-  //   }
-  // };
-
-  const transferPlayback = async () => {
-    // console.log("Transferring to " + deviceId);
-
-    if (!deviceId) return;
+  const getDevices = async () => {
+    if (!token) return;
     try {
-      await fetchWithAuth("https://api.spotify.com/v1/me/player", {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          device_ids: [deviceId],
-          play: false,
-        }),
-      });
+      const res = await fetchWithAuth(
+        "https://api.spotify.com/v1/me/player/devices",
+      );
+      const data = await res.json();
+      // console.log(data);
+      return data;
     } catch (err) {
-      console.error("Failed to transfer playback:", err);
+      console.error("Failed to fetch devices:", err);
     }
   };
 
+  const transferPlayback = async (id) => {
+    // only if necessary
+    if (!id) return;
+    const devices = await getDevices();
+    const activeDevice = devices.devices.find((device) => device.id === id);
+    if (!activeDevice || !activeDevice.is_active) {
+      try {
+        const res = await fetchWithAuth(
+          "https://api.spotify.com/v1/me/player",
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ device_ids: [id], play: false }),
+          },
+        );
+        if (res.status === 404) return;
+      } catch (err) {
+        console.error("Failed to transfer playback:", err);
+      }
+    }
+  };
+
+  const ensurePlayer = async () => {
+    if (!playerReady.current) throw new Error("Player not initialized yet");
+    const readyDeviceId = playerReady.current;
+
+    const devices = await getDevices();
+    const activeDevice = devices.devices.find(
+      (device) => device.name === "soundTracker Player",
+    );
+    // console.log(activeDevice);
+
+    if (activeDevice && activeDevice.id !== readyDeviceId) {
+      setDeviceId(activeDevice.id);
+      return activeDevice.id;
+    }
+
+    return readyDeviceId;
+  };
+
   const playAlbum = async (id) => {
+    const currDevice = await ensurePlayer();
     if (!player) return;
-    player.connect();
+
     try {
-      const res = await fetchWithAuth(
-        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
-        {
-          method: "PUT",
-          body: JSON.stringify({ context_uri: id }),
-        },
+      await fetchWithAuth(
+        `https://api.spotify.com/v1/me/player/play?device_id=${currDevice}`,
+        { method: "PUT", body: JSON.stringify({ context_uri: id }) },
       );
     } catch (err) {
       console.error("Play Album failed: ", err);
     }
   };
 
-  const togglePlay = async () => {
-    // await fetchCurrentPlayback();
+  const playPlaylist = async (id) => {
+    const currDevice = await ensurePlayer();
     if (!player) return;
-    player.connect();
 
-    await player.togglePlay();
+    try {
+      await fetchWithAuth(
+        `https://api.spotify.com/v1/me/player/play?device_id=${currDevice}`,
+        { method: "PUT", body: JSON.stringify({ context_uri: id }) },
+      );
+    } catch (err) {
+      console.error("Play Playlist failed: ", err);
+    }
+  };
+
+  const togglePlay = async () => {
+    const currDevice = await ensurePlayer();
+    // console.log(deviceId)
+    if (!player) return;
+
+    const playOrPause = isPaused ? "play" : "pause";
+
+    try {
+      await fetchWithAuth(
+        `https://api.spotify.com/v1/me/player/${playOrPause}?device_id=${currDevice}`,
+        { method: "PUT" },
+      );
+    } catch (err) {
+      console.error("Play failed: ", err);
+    }
   };
 
   const toggleShuffle = async () => {
     if (!player) return;
-
     try {
       await fetchWithAuth(
         `https://api.spotify.com/v1/me/player/shuffle?state=${!isShuffled}&device_id=${deviceId}`,
         { method: "PUT" },
       );
-
       setIsShuffled((prev) => !prev);
     } catch (err) {
       console.error("Shuffle failed:", err);
@@ -108,35 +146,39 @@ export const PlayerProvider = ({ children }) => {
     await player.seek(value);
   };
 
+  // context & next up hud
   useEffect(() => {
     const updateNowPlayingHud = async () => {
+      if (!player) return;
       const state = await player.getCurrentState();
       if (!state) return;
-      setNextTrack(state.track_window.next_tracks[0]);
-      const contextUri = state.context.uri;
-      if (!contextUri) return;
-      const [, contextType, contextId] = contextUri.split(":");
 
+      setNextTrack(state.track_window.next_tracks[0]);
+      setCurrentTrack(state.track_window.current_track);
+      const contextUri = state.context?.uri;
+      if (!contextUri) return;
+
+      const [, contextType, contextId] = contextUri.split(":");
       if (contextType === "album") {
         if (!albumCache[contextId]) {
           const fullData = await getAlbum(contextId);
           setAlbumCache((prev) => ({ ...prev, [contextId]: fullData }));
+          setContext(fullData);
+        } else {
+          setContext(albumCache[contextId]);
         }
-        setContext(albumCache[contextId]);
       } else if (contextType === "playlist") {
-        setContext(playlists.find((playlist) => playlist.id === contextId));
+        setContext(playlists.find((p) => p.id === contextId));
       } else {
         setContext(null);
       }
     };
+
     if (player) updateNowPlayingHud();
   }, [currentTrack, isShuffled]);
 
-  // --- INIT PLAYER ---
-
-  // enforce singleton player
-  const playerRef = useRef(null);
-
+  // initialize player
+  // initialize player
   useEffect(() => {
     if (!token) {
       setPlayer(null);
@@ -146,53 +188,58 @@ export const PlayerProvider = ({ children }) => {
       return;
     }
 
-    const loadPlayer = () => {
-      if (playerRef.current) return; // guard
+    const loadPlayer = async () => {
+      if (hasInitialized.current) return;
+      hasInitialized.current = true;
 
-      const player = new window.Spotify.Player({
-        name: "Soundtracker Player",
-        getOAuthToken: (cb) => cb(token),
+      const playerInstance = new window.Spotify.Player({
+        name: "soundTracker Player",
+        getOAuthToken: (cb) => {
+          refreshAccessToken()
+            .then((newToken) => cb(newToken))
+            .catch((err) => console.error("Failed to refresh token", err));
+        },
         volume: 0.2,
       });
 
-      playerRef.current = player;
+      playerRef.current = playerInstance;
 
-      player.addListener("ready", ({ device_id }) => {
-        setDeviceId(device_id);
-        player.setVolume(volume ? volume / 100 : 0.2);
-        // console.log("player ready at " + device_id);
+      playerReady.current = new Promise((resolve) => {
+        playerInstance.addListener("ready", async ({ device_id }) => {
+          setDeviceId(device_id);
+          playerInstance.setVolume(volume ? volume / 100 : 0.2);
+          resolve(device_id);
+        });
       });
 
-      player.addListener("player_state_changed", (state) => {
+      // reduce frequent re-renders by batching state updates
+      playerInstance.addListener("player_state_changed", (state) => {
         if (!state) return;
-
-        setCurrentTrack(state.track_window.current_track);
-        setNextTrack(state.track_window.next_tracks[0]);
+        setCurrentTrack((prev) =>
+          prev?.id !== state.track_window.current_track.id
+            ? state.track_window.current_track
+            : prev,
+        );
+        setNextTrack(state.track_window.next_tracks[0] || null);
         setIsPaused(state.paused);
         setPosition(state.position);
         setDuration(state.duration);
-
-        if (typeof state.volume === "number") {
-          setVolume(state.volume * 100);
-        }
+        if (typeof state.volume === "number") setVolume(state.volume * 100);
       });
 
-      player.connect();
-      setPlayer(player);
+      playerInstance.connect();
+      setPlayer(playerInstance);
     };
 
     if (window.Spotify) {
       loadPlayer();
-    } else {
-      if (!document.getElementById("spotify-sdk")) {
-        const script = document.createElement("script");
-        script.id = "spotify-sdk";
-        script.src = "https://sdk.scdn.co/spotify-player.js";
-        script.async = true;
-        document.body.appendChild(script);
-      }
-
-      window.onSpotifyWebPlaybackSDKReady = loadPlayer;
+    } else if (!document.getElementById("spotify-sdk")) {
+      const script = document.createElement("script");
+      script.id = "spotify-sdk";
+      script.src = "https://sdk.scdn.co/spotify-player.js";
+      script.async = true;
+      script.onload = loadPlayer; // call once SDK loads
+      document.body.appendChild(script);
     }
 
     return () => {
@@ -200,26 +247,16 @@ export const PlayerProvider = ({ children }) => {
         playerRef.current.disconnect();
         playerRef.current = null;
       }
+      hasInitialized.current = false;
     };
   }, [token]);
 
-  useEffect(() => {
-    if (token && deviceId) {
-      transferPlayback();
-    }
-  }, [token, deviceId]);
-
-  // position ticking
+  // update seekbar
   useEffect(() => {
     if (isPaused) return;
-
     const interval = setInterval(() => {
-      setPosition((prev) => {
-        const next = prev + 1000;
-        return next > duration ? duration : next;
-      });
+      setPosition((prev) => Math.min(prev + 1000, duration));
     }, 1000);
-
     return () => clearInterval(interval);
   }, [isPaused, duration]);
 
@@ -242,6 +279,7 @@ export const PlayerProvider = ({ children }) => {
     playAlbum,
     playlists,
     setPlaylists,
+    playPlaylist,
   };
 
   return (

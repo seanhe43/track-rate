@@ -118,7 +118,10 @@ router.get("/me/playlists", async (req, res) => {
         headers: { Authorization: `Bearer ${userToken}` },
       },
     );
-
+    if (response.status === 429) {
+      console.log(response);
+      return;
+    }
     const data = await response.json();
     res.json(data.items || []);
   } catch (err) {

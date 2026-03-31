@@ -52,46 +52,45 @@ export const useSpotifyApi = () => {
     return data || [];
   };
 
-  const playPlaylist = async (deviceId, id) => {
-    const res = await fetchWithAuth(`${BASE_URL}/me/player/play`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ deviceId, id }),
-    });
+  // const playPlaylist = async (deviceId, id) => {
+  //   const res = await fetchWithAuth(`${BASE_URL}/me/player/play`, {
+  //     method: "PUT",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //     body: JSON.stringify({ deviceId, id }),
+  //   });
 
-    if (!res.ok) {
-      throw new Error("Failed to start playlist");
-    }
-  };
+  //   if (!res.ok) {
+  //     throw new Error("Failed to start playlist");
+  //   }
+  // };
 
 
-  const transferPlayback = async (deviceId) => {
-    try {
-      await fetchWithAuth(`${BASE_URL}/me/player`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          device_ids: [deviceId],
-          play: false,
-        }),
-      });
-    } catch (err) {
-      console.error("Failed to transfer playback:", err);
-    }
-  };
+  // const transferPlayback = async (deviceId) => {
+  //   try {
+  //     await fetchWithAuth(`${BASE_URL}/me/player`, {
+  //       method: "PUT",
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         device_ids: [deviceId],
+  //         play: false,
+  //       }),
+  //     });
+  //   } catch (err) {
+  //     console.error("Failed to transfer playback:", err);
+  //   }
+  // };
 
   return {
     searchSpotify,
     getUserPlaylists,
-    playPlaylist,
     getAlbum,
-    transferPlayback,
+    // transferPlayback,
   };
 };
 

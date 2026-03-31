@@ -57,8 +57,8 @@ p {
 
 
 .sort-controls {
-  display: flex;            /* flatten flex, keep select + button on same row */
+  display: flex;
   gap: 0.2rem;
   flex: 1;
-  align-items: center;      /* ensures children are centered vertically */
+  align-items: center;
 }
