@@ -99,7 +99,7 @@ export const MusicProvider = ({ children }) => {
   }, [selectedAlbum]);
 
   // info modal
-  const [infoModalOpen, setInfoModalOpen] = useState(true);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
 
   const openInfoModal = () => {
     setInfoModalOpen(true);
@@ -109,7 +109,14 @@ export const MusicProvider = ({ children }) => {
     setInfoModalOpen(false);
   };
 
-  const [deviceId, setDeviceId] = useState(null);
+  useEffect(() => {
+    const seen = localStorage.getItem("seenInfoModal");
+
+    if (!seen) {
+      openInfoModal();
+      localStorage.setItem("seenInfoModal", "true")
+    }
+  }, []);
 
   const value = {
     listened,
@@ -125,8 +132,6 @@ export const MusicProvider = ({ children }) => {
     updateNote,
     getNote,
     extendedAlbum,
-    deviceId,
-    setDeviceId,
     albumDetailsCache,
     setAlbumDetailsCache,
     infoModalOpen,

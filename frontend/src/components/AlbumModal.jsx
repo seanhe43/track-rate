@@ -3,7 +3,6 @@ import { useMusicContext } from "../contexts/MusicContext";
 import { usePlayerContext } from "../contexts/PlayerContext";
 import "../css/AlbumModal.css";
 
-
 const AlbumModal = () => {
   const {
     selectedAlbum,
@@ -15,7 +14,7 @@ const AlbumModal = () => {
     addToListened,
     removeFromListened,
     extendedAlbum,
-  } = useMusicContext(); 
+  } = useMusicContext();
 
   const { playAlbum } = usePlayerContext();
 
@@ -59,7 +58,12 @@ const AlbumModal = () => {
   return (
     <>
       {modalLoading ? (
-        <div>Loading</div>
+        <div className="modal-overlay" onClick={closeAlbumModal}>
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >Loading...</div>
+        </div>
       ) : (
         <div className="modal-overlay" onClick={closeAlbumModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>

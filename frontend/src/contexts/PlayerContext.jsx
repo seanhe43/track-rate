@@ -178,7 +178,6 @@ export const PlayerProvider = ({ children }) => {
   }, [currentTrack, isShuffled]);
 
   // initialize player
-  // initialize player
   useEffect(() => {
     if (!token) {
       setPlayer(null);
@@ -190,6 +189,8 @@ export const PlayerProvider = ({ children }) => {
 
     const loadPlayer = async () => {
       if (hasInitialized.current) return;
+      if (!window.Spotify) return; // hard guard
+
       hasInitialized.current = true;
 
       const playerInstance = new window.Spotify.Player({
@@ -205,16 +206,16 @@ export const PlayerProvider = ({ children }) => {
       playerRef.current = playerInstance;
 
       playerReady.current = new Promise((resolve) => {
-        playerInstance.addListener("ready", async ({ device_id }) => {
+        playerInstance.addListener("ready", ({ device_id }) => {
           setDeviceId(device_id);
           playerInstance.setVolume(volume ? volume / 100 : 0.2);
           resolve(device_id);
         });
       });
 
-      // reduce frequent re-renders by batching state updates
       playerInstance.addListener("player_state_changed", (state) => {
         if (!state) return;
+
         setCurrentTrack((prev) =>
           prev?.id !== state.track_window.current_track.id
             ? state.track_window.current_track
@@ -231,25 +232,26 @@ export const PlayerProvider = ({ children }) => {
       setPlayer(playerInstance);
     };
 
-    if (window.Spotify) {
-      loadPlayer();
-    } else if (!document.getElementById("spotify-sdk")) {
+    if (!document.getElementById("spotify-sdk")) {
       const script = document.createElement("script");
       script.id = "spotify-sdk";
       script.src = "https://sdk.scdn.co/spotify-player.js";
       script.async = true;
-      script.onload = loadPlayer; // call once SDK loads
       document.body.appendChild(script);
     }
+
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      loadPlayer();
+    };
 
     return () => {
       if (playerRef.current) {
         playerRef.current.disconnect();
         playerRef.current = null;
       }
-      hasInitialized.current = false;
+      // hasInitialized.current = false;
     };
-  }, [token]);
+  }, []);
 
   // update seekbar
   useEffect(() => {
