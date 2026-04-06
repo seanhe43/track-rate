@@ -16,7 +16,7 @@ function MyMusic() {
     const filtered = listened.filter((album) => {
       const term = searchQuery.toLowerCase();
       const nameMatch = album.name.toLowerCase().includes(term);
-      const artistMatch = album.artists.some((artist) =>
+      const artistMatch = album.artists?.some((artist) =>
         artist.name.toLowerCase().includes(term),
       );
       return nameMatch || artistMatch;
