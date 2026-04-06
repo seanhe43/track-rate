@@ -6,6 +6,7 @@ const router = express.Router();
 const clientId = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
+const callbackUri = process.env.FRONTEND_CALLBACK_URI;
 
 router.get("/login", (req, res) => {
   const scope = [
@@ -54,7 +55,7 @@ router.get("/callback", async (req, res) => {
 
   // Redirect back to frontend with token
   res.redirect(
-    `http://localhost:5173/callback?token=${accessToken}&refresh_token=${refreshToken}`,
+    `${callbackUri}/callback?token=${accessToken}&refresh_token=${refreshToken}`,
   );
 });
 
