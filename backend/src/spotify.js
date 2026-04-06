@@ -39,22 +39,30 @@ router.get("/search", async (req, res) => {
   const { q, type } = req.query;
   const userToken = req.headers["authorization"]?.replace("Bearer ", "");
   const LIMIT = 10;
+
   try {
     const isValidToken =
       userToken && userToken !== "null" && userToken !== "undefined";
     const token = isValidToken ? userToken : await getSpotifyToken();
-    const response = await fetch(
-      `https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=${type}&limit=${LIMIT}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
+
+    const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=${type}&limit=${LIMIT}`;
+    console.log("Fetching Spotify API:", url);
+
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    // Check for HTTP errors
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("Spotify API returned error:", response.status, text);
+      return res.status(response.status).json({ error: text });
+    }
+
     const data = await response.json();
     res.json(data);
   } catch (err) {
-    console.error(err);
+    console.error("Error calling Spotify API:", err);
     res.status(500).json({ error: "Spotify API error" });
   }
 });
@@ -91,7 +99,8 @@ router.get("/playlists/:id", async (req, res) => {
       userToken && userToken !== "null" && userToken !== "undefined";
     const token = isValidToken ? userToken : await getSpotifyToken();
     const response = await fetch(
-      `https://api.spotify.com/v1/playlists/${id}/items?fields=items(track(album))&limit=16`, {
+      `https://api.spotify.com/v1/playlists/${id}/items?fields=items(track(album))&limit=16`,
+      {
         headers: {
           Authorization: `Bearer ${token}`,
         },
