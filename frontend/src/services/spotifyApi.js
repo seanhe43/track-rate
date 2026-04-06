@@ -1,7 +1,7 @@
 import { useAuth } from "../contexts/AuthContext";
 
 const backendUrl = import.meta.env.VITE_REACT_APP_API_URL;
-const BASE_URL = `http://${backendUrl}/api`;
+const BASE_URL = `${backendUrl}/api`;
 
 export const useSpotifyApi = () => {
   const { fetchWithAuth, token } = useAuth();
