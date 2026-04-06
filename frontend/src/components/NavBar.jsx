@@ -19,7 +19,7 @@ function NavBar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/">SoundTracker</Link>
+        <Link to="/">soundTracker</Link>
       </div>
       <div className="navbar-links">
         <button onClick={openInfoModal} className="info-button" />

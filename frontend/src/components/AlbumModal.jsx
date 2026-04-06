@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useMusicContext } from "../contexts/MusicContext";
 import { usePlayerContext } from "../contexts/PlayerContext";
+import Rating from "@mui/material/Rating";
 import "../css/AlbumModal.css";
 
 const AlbumModal = () => {
@@ -14,6 +15,8 @@ const AlbumModal = () => {
     addToListened,
     removeFromListened,
     extendedAlbum,
+    getRating,
+    setRating
   } = useMusicContext();
 
   const { playAlbum } = usePlayerContext();
@@ -54,15 +57,33 @@ const AlbumModal = () => {
       console.error(err);
     }
   };
+  function onRatingChange(e, newRating) {
+    e.stopPropagation();
+    if (!isListened(selectedAlbum.id)) addToListened(selectedAlbum);
+    setRating(selectedAlbum.id, newRating);
+  }
+
+  const ratingProperties = {
+    value: getRating(selectedAlbum.id) || 0,
+    onChange: (e, newRating) => onRatingChange(e, newRating),
+    onClick: (e) => e.stopPropagation(),
+    precision: 0.5,
+    sx: {
+      color: "#e06588",
+      "& .MuiRating-iconEmpty": {
+        color: "#66707a",
+      },
+      textShadow: "0 0 6px rgba(0,0,0,0.8)",
+    },
+  };
 
   return (
     <>
       {modalLoading ? (
         <div className="modal-overlay" onClick={closeAlbumModal}>
-          <div
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >Loading...</div>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            Loading...
+          </div>
         </div>
       ) : (
         <div className="modal-overlay" onClick={closeAlbumModal}>
@@ -89,6 +110,9 @@ const AlbumModal = () => {
                     .join(", ")}
                 </p>
                 <p className="album-year">{displayAlbum.release_date}</p>
+                <div className="modal-rating">
+                  <Rating {...ratingProperties} />
+                </div>
                 <button
                   className="play-button"
                   onClick={() => handlePlayAlbum(displayAlbum.uri)}
@@ -106,6 +130,7 @@ const AlbumModal = () => {
                     />
                   </div>
                 )}
+                
               </div>
 
               <ul className="track-list">

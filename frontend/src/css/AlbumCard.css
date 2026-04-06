@@ -1,5 +1,3 @@
-/* AlbumCard.css - Dark Theme with Top-Right Button */
-
 .album-card {
   width: 100%;
   max-width: var(--card-size);
@@ -91,7 +89,7 @@
   background-color: rgba(0, 255, 55, 0.863);
 }
 
-.rating {
+.card-rating {
   position: absolute;
   bottom: 0px;
   right: 0px;

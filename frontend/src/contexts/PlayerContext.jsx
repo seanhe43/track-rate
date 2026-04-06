@@ -67,7 +67,7 @@ export const PlayerProvider = ({ children }) => {
 
   const ensurePlayer = async () => {
     if (!playerReady.current) throw new Error("Player not initialized yet");
-    const readyDeviceId = playerReady.current;
+    const readyDeviceId = await playerReady.current;
 
     const devices = await getDevices();
     const activeDevice = devices.devices.find(
@@ -79,7 +79,7 @@ export const PlayerProvider = ({ children }) => {
       setDeviceId(activeDevice.id);
       return activeDevice.id;
     }
-
+    console.log(readyDeviceId);
     return readyDeviceId;
   };
 
@@ -187,9 +187,28 @@ export const PlayerProvider = ({ children }) => {
       return;
     }
 
-    const loadPlayer = async () => {
+    const loadSpotifySDK = () =>
+      new Promise((resolve) => {
+        if (window.Spotify) return resolve(window.Spotify);
+
+        window.onSpotifyWebPlaybackSDKReady = () => {
+          resolve(window.Spotify);
+        };
+      });
+
+    const initPlayer = async () => {
       if (hasInitialized.current) return;
-      if (!window.Spotify) return; // hard guard
+
+      // inject SDK if not already present
+      if (!document.getElementById("spotify-sdk")) {
+        const script = document.createElement("script");
+        script.id = "spotify-sdk";
+        script.src = "https://sdk.scdn.co/spotify-player.js";
+        script.async = true;
+        document.body.appendChild(script);
+      }
+
+      await loadSpotifySDK(); 
 
       hasInitialized.current = true;
 
@@ -197,7 +216,7 @@ export const PlayerProvider = ({ children }) => {
         name: "soundTracker Player",
         getOAuthToken: (cb) => {
           refreshAccessToken()
-            .then((newToken) => cb(newToken))
+            .then(cb)
             .catch((err) => console.error("Failed to refresh token", err));
         },
         volume: 0.2,
@@ -205,6 +224,7 @@ export const PlayerProvider = ({ children }) => {
 
       playerRef.current = playerInstance;
 
+      // ready promise
       playerReady.current = new Promise((resolve) => {
         playerInstance.addListener("ready", ({ device_id }) => {
           setDeviceId(device_id);
@@ -213,6 +233,7 @@ export const PlayerProvider = ({ children }) => {
         });
       });
 
+      // state updates
       playerInstance.addListener("player_state_changed", (state) => {
         if (!state) return;
 
@@ -221,35 +242,34 @@ export const PlayerProvider = ({ children }) => {
             ? state.track_window.current_track
             : prev,
         );
+
         setNextTrack(state.track_window.next_tracks[0] || null);
         setIsPaused(state.paused);
         setPosition(state.position);
         setDuration(state.duration);
-        if (typeof state.volume === "number") setVolume(state.volume * 100);
+
+        if (typeof state.volume === "number") {
+          setVolume(state.volume * 100);
+        }
       });
+
+      // error listeners 
+      playerInstance.addListener("initialization_error", console.error);
+      playerInstance.addListener("authentication_error", console.error);
+      playerInstance.addListener("account_error", console.error);
+      playerInstance.addListener("playback_error", console.error);
 
       playerInstance.connect();
       setPlayer(playerInstance);
     };
 
-    if (!document.getElementById("spotify-sdk")) {
-      const script = document.createElement("script");
-      script.id = "spotify-sdk";
-      script.src = "https://sdk.scdn.co/spotify-player.js";
-      script.async = true;
-      document.body.appendChild(script);
-    }
-
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      loadPlayer();
-    };
+    initPlayer();
 
     return () => {
       if (playerRef.current) {
         playerRef.current.disconnect();
         playerRef.current = null;
       }
-      // hasInitialized.current = false;
     };
   }, []);
 

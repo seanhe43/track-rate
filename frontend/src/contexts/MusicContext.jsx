@@ -123,8 +123,6 @@ export const MusicProvider = ({ children }) => {
     addToListened,
     removeFromListened,
     isListened,
-    // top10,
-    // top10Loading
     openAlbumModal,
     closeAlbumModal,
     selectedAlbum,
