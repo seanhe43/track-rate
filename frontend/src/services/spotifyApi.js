@@ -1,6 +1,6 @@
 import { useAuth } from "../contexts/AuthContext";
 
-const backendUrl = process.env.REACT_APP_API_URL;
+const backendUrl = import.meta.env.VITE_REACT_APP_API_URL;
 const BASE_URL = `http://${backendUrl}/api`;
 
 export const useSpotifyApi = () => {
@@ -39,8 +39,6 @@ export const useSpotifyApi = () => {
     return res.json();
   };
 
-
-
   // User-specific endpoints
   const getUserPlaylists = async () => {
     const res = await fetchWithAuth(`${BASE_URL}/me/playlists`);
@@ -67,7 +65,6 @@ export const useSpotifyApi = () => {
   //     throw new Error("Failed to start playlist");
   //   }
   // };
-
 
   // const transferPlayback = async (deviceId) => {
   //   try {

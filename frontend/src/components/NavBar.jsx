@@ -8,7 +8,7 @@ function NavBar() {
   const { openInfoModal } = useMusicContext();
 
   const handleLogin = () => {
-    const backendUrl = process.env.REACT_APP_API_URL;
+    const backendUrl = import.meta.env.VITE_REACT_APP_API_URL;
     window.location.href = `${backendUrl}/auth/login`;
   };
 

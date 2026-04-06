@@ -5,7 +5,7 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const backendUrl = process.env.REACT_APP_API_URL;
+  const backendUrl = import.meta.env.VITE_REACT_APP_API_URL;;
 
   const [token, setToken] = useState(
     () => localStorage.getItem("spotify_token") || null,
