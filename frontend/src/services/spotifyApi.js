@@ -1,6 +1,7 @@
 import { useAuth } from "../contexts/AuthContext";
 
-const BASE_URL = "http://localhost:5000/api";
+const backendUrl = process.env.REACT_APP_API_URL;
+const BASE_URL = `http://${backendUrl}/api`;
 
 export const useSpotifyApi = () => {
   const { fetchWithAuth, token } = useAuth();

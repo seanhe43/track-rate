@@ -8,7 +8,8 @@ function NavBar() {
   const { openInfoModal } = useMusicContext();
 
   const handleLogin = () => {
-    window.location.href = "http://localhost:5000/auth/login";
+    const backendUrl = process.env.REACT_APP_API_URL;
+    window.location.href = `${backendUrl}/auth/login`;
   };
 
   const handleLogout = () => {
@@ -30,7 +31,7 @@ function NavBar() {
             <button onClick={handleLogout}>Logout</button>
           )}
         </div>
-        
+
         <Link to="/" className="nav-link">
           Home
         </Link>
