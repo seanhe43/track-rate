@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const res = await fetch(
-        `http://${backendUrl}/auth/refresh?refresh_token=${refreshToken}`,
+        `${backendUrl}/auth/refresh?refresh_token=${refreshToken}`,
       );
 
       const data = await res.json();
